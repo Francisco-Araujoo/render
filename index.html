@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RENDER 7 | Especialistas em Administração de Obras</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600;700&family=Montserrat:wght@800;900&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            mainBeige: '#C7BFB4',
+                            mainGrey: '#818781',
+                            darkGreen: '#383B38',
+                            midGreen: '#595D59',
+                            lightGreen: '#DCE5DC',
+                            brown: '#725D41',
+                            sand: '#9C8B73',
+                            darkBrown: '#33230C',
+                            darkSlate: '#293C48',
+                            slate: '#415F72',
+                            lightSlate: '#B3BFC7',
+                            white: '#FAFAFA',
+                            black: '#111111'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Manrope', 'sans-serif'],
+                        display: ['Montserrat', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Base e Reset para Smooth Scroll */
+        html.lenis, html.lenis body { height: auto; }
+        .lenis.lenis-smooth { scroll-behavior: auto !important; }
+        .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+        .lenis.lenis-stopped { overflow: hidden; }
+        .lenis.lenis-scrolling iframe { pointer-events: none; }
+
+        body {
+            background-color: #FAFAFA; /* Fundo base limpo */
+            color: #111111;
+            overflow-x: hidden;
+            margin: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Loader Screen */
+        .loader-screen {
+            position: fixed;
+            inset: 0;
+            background: #111111;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Modal Custom Scrollbar */
+        .modal-scroll::-webkit-scrollbar { width: 6px; }
+        .modal-scroll::-webkit-scrollbar-track { background: transparent; }
+        .modal-scroll::-webkit-scrollbar-thumb { background: #C7BFB4; border-radius: 10px; }
+
+        /* Imagens com aspect ratio padronizado */
+        .img-cover {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Transições limpas */
+        .fade-up {
+            opacity: 0;
+            transform: translateY(30px);
+            will-change: opacity, transform;
+        }
+    </style>
+</head>
+<body class="selection:bg-brand-darkGreen selection:text-brand-mainBeige">
+
+    <div class="loader-screen" id="loader">
+        <img src="/logos/RENDER7_Simbolo cópia.png" alt="RENDER 7" class="loader-logo h-12 md:h-20 w-auto object-contain opacity-0">
+    </div>
+
+    <header class="fixed w-full top-0 z-40 p-6 md:p-10 flex items-center justify-start gap-6 md:gap-10 mix-blend-difference text-brand-white pointer-events-none">
+        <a href="#hero" class="flex items-center hover:opacity-80 transition-opacity pointer-events-auto">
+            <img src="/logos/RENDER7_Simbolo cópia.png" alt="RENDER 7" class="h-6 md:h-8 w-auto object-contain">
+        </a>
+        <button id="menu-toggle" class="font-sans font-bold tracking-[0.2em] text-xs uppercase hover:text-brand-mainBeige transition-colors pointer-events-auto">Menu</button>
+        <a href="#login" class="font-sans font-bold tracking-[0.2em] text-xs uppercase hover:text-brand-mainBeige transition-colors pointer-events-auto">Login</a>
+    </header>
+
+    <div id="menu-overlay" class="fixed inset-0 bg-brand-black z-30 flex items-center justify-center transform -translate-y-full">
+        <nav class="text-center text-brand-mainBeige w-full px-6 max-h-screen overflow-y-auto">
+            <ul class="space-y-6 md:space-y-8 py-20">
+                <li class="overflow-hidden"><a href="#hero" class="menu-item block font-sans font-bold text-3xl md:text-6xl uppercase tracking-widest hover:text-brand-white transition-colors">Início</a></li>
+                <li class="overflow-hidden"><a href="#arquiteto" class="menu-item block font-sans font-bold text-3xl md:text-6xl uppercase tracking-widest hover:text-brand-white transition-colors">A Marca</a></li>
+                <li class="overflow-hidden"><a href="#pilares" class="menu-item block font-sans font-bold text-3xl md:text-6xl uppercase tracking-widest hover:text-brand-white transition-colors">O Método</a></li>
+                <li class="overflow-hidden"><a href="#projetos" class="menu-item block font-sans font-bold text-3xl md:text-6xl uppercase tracking-widest hover:text-brand-white transition-colors">Projetos</a></li>
+                <li class="overflow-hidden"><a href="#contacto" class="menu-item block font-sans font-bold text-3xl md:text-6xl uppercase tracking-widest hover:text-brand-white transition-colors">Contacto</a></li>
+                <li class="overflow-hidden mt-12 pt-8 md:pt-12 border-t border-brand-darkGreen/50 w-3/4 mx-auto">
+                    <a href="#login-tecnico" class="menu-item block font-sans font-bold text-xl md:text-3xl uppercase tracking-widest text-brand-brown hover:text-brand-white transition-colors">Login Técnico</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <div id="project-modal" data-lenis-prevent class="fixed inset-0 z-50 bg-brand-white text-brand-darkGreen flex flex-col modal-scroll overflow-y-auto overscroll-contain" style="clip-path: inset(100% 0 0 0); -webkit-overflow-scrolling: touch;">
+        
+        <div class="sticky top-0 w-full p-6 md:p-10 flex justify-between items-center z-[60] bg-brand-white/90 backdrop-blur-sm border-b border-brand-lightGreen">
+            <span class="font-display font-black tracking-[0.1em] md:tracking-[0.15em] text-[10px] md:text-sm uppercase text-brand-darkGreen">Acervo de Projetos</span>
+            <button id="close-modal" class="font-sans font-bold tracking-[0.15em] md:tracking-[0.2em] text-[10px] md:text-xs uppercase text-brand-darkGreen hover:text-brand-brown transition-colors">Fechar (X)</button>
+        </div>
+
+        <div class="max-w-screen-xl mx-auto w-full px-6 md:px-16 py-10 md:py-24">
+            <div class="mb-10 md:mb-20 fade-up-modal">
+                <p id="modal-category" class="font-sans font-bold text-brand-brown uppercase tracking-[0.2em] text-[10px] md:text-xs mb-3 md:mb-4">Categoria</p>
+                <h2 id="modal-title" class="font-display font-black text-3xl sm:text-5xl md:text-7xl uppercase tracking-tight text-brand-darkGreen leading-none mb-8 md:mb-12 break-words">Nome do Projeto</h2>
+                
+                <div class="w-full h-[35vh] sm:h-[50vh] md:h-[70vh] mb-10 md:mb-12 bg-brand-lightGreen">
+                    <img id="modal-hero-img" src="" class="img-cover grayscale">
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-10 md:gap-12">
+                    <div class="col-span-1">
+                        <p class="font-sans font-bold text-[10px] md:text-xs uppercase tracking-[0.3em] text-brand-mainGrey mb-6 flex items-center gap-4">
+                            <span class="w-6 h-[1px] bg-brand-mainGrey inline-block"></span> Ficha Técnica
+                        </p>
+                        <ul class="font-sans text-[11px] md:text-sm uppercase tracking-widest space-y-4 text-brand-darkSlate">
+                            <li><span class="text-brand-black font-bold">Local:</span> Londrina, PR</li>
+                            <li><span class="text-brand-black font-bold">Status:</span> Concluído</li>
+                            <li><span class="text-brand-black font-bold">Gestão:</span> Render 7</li>
+                        </ul>
+                    </div>
+                    <div class="col-span-1 lg:col-span-2">
+                        <p class="font-sans font-light text-base sm:text-lg md:text-2xl leading-relaxed text-brand-darkGreen">
+                            A materialização de um conceito através de uma gestão impecável. Cada detalhe estrutural e de acabamento foi supervisionado milimetricamente para refletir a excelência e o padrão da Render 7. A integração dos materiais brutos com a geometria limpa resulta em uma estética contemporânea atemporal.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="modal-gallery" class="grid grid-cols-1 md:grid-cols-2 gap-6 fade-up-modal">
+            </div>
+        </div>
+    </div>
+
+    <section id="hero" class="min-h-screen bg-brand-black text-brand-white pt-32 pb-12 flex flex-col justify-between px-6 md:px-16">
+        <div class="max-w-screen-2xl mx-auto w-full mb-12">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-end">
+                <div class="fade-up">
+                   
+                </div>
+                
+            </div>
+        </div>
+        
+        <div class="w-full h-[40vh] md:h-[60vh] overflow-hidden fade-up bg-brand-darkGreen">
+            <img src="/Construction-Site-Advertising-Board-Mockup.jpg.jpeg" alt="Arquitetura Corporativa" class="img-cover opacity-80 mix-blend-luminosity">
+        </div>
+    </section>
+
+    <section id="arquiteto" class="py-24 md:py-40 px-6 md:px-16 bg-brand-white text-brand-darkGreen">
+        <div class="max-w-screen-2xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-24 items-center">
+            
+            <div class="order-2 lg:order-1 h-[40vh] sm:h-[50vh] md:h-[80vh] w-full overflow-hidden fade-up bg-brand-lightGreen">
+                <img src="APRESENTAÇÃO DE MARCA - RENDER7 (4)_compressed_page-0055.jpg" alt="Arquiteto Carlos Filipov" class="img-cover grayscale hover:grayscale-0 transition duration-700">
+            </div>
+
+            <div class="order-1 lg:order-2 fade-up">
+                <p class="font-sans font-bold text-xs uppercase tracking-[0.3em] text-brand-brown mb-6 md:mb-8 flex items-center gap-4">
+                    <span class="w-8 h-[1px] bg-brand-brown inline-block"></span> Liderança
+                </p>
+                <h2 class="font-sans font-bold text-4xl sm:text-5xl lg:text-7xl uppercase leading-tight mb-6 md:mb-8 tracking-tight text-brand-darkBrown">
+                    Render7
+                </h2>
+                <div class="space-y-4 md:space-y-6 text-brand-darkSlate">
+                    <p class="font-sans font-medium text-base md:text-xl leading-relaxed">
+                        O grupo é chefiado pelo empresário Carlos Filipov , arquiteto de formação Que atua mais de 15 anos no mercado da construção civil , possui vasta experiência na  elaboração  de projetos de arquitetura e engenharia de alto padrão.
+                    </p>
+                    <p class="font-sans font-medium text-base md:text-xl leading-relaxed">
+                        A Render7  desenvolve uma gestão administrativa bem definida e qualificada , aonde o cliente possui transparência nas informações dos serviços prestados em cada etapa e processo da evolução da obra.<br>Essas informações estão na plataforma do site<br>Clique no login
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <section id="manifesto" class="relative py-32 md:py-56 px-6 md:px-16 text-center flex justify-center items-center overflow-hidden border-y border-brand-mainBeige">
+        
+        <div class="absolute inset-0 w-full h-full z-0">
+            <img src="APRESENTAÇÃO DE MARCA - RENDER7 (4)_compressed_page-0027.jpg" alt="Padrão Render 7" class="w-full h-full object-cover opacity-80">
+            <div class="absolute inset-0 bg-brand-mainBeige/40 mix-blend-overlay"></div>
+        </div>
+
+        <div class="relative z-10 max-w-screen-xl mx-auto fade-up">
+            <h2 class="font-sans font-light text-2xl sm:text-3xl md:text-5xl lg:text-6xl leading-[1.4] md:leading-[1.3] tracking-tight text-brand-darkGreen">
+                "Uma obra bem-sucedida não depende apenas da <span class="font-bold text-brand-darkBrown">força braçal</span>, mas da <span class="font-serif italic text-brand-brown">inteligência de gestão</span>. Nós assumimos o controle para transformar o planejamento em <span class="font-bold text-brand-black">resultado concreto</span>."
+            </h2>
+        </div>
+    </section>
+
+    <section id="essencia" class="py-24 md:py-40 px-6 md:px-16 bg-brand-lightGreen text-brand-darkGreen">
+        <div class="max-w-screen-2xl mx-auto">
+            <div class="flex flex-col md:flex-row gap-8 md:gap-12 justify-between mb-12 md:mb-16 fade-up">
+                <div class="w-full md:w-1/2">
+                    <p class="font-sans font-bold text-xs uppercase tracking-[0.3em] text-brand-mainGrey mb-4 md:mb-6 flex items-center gap-4">
+                        <span class="w-8 h-[1px] bg-brand-mainGrey inline-block"></span> O Contraponto
+                    </p>
+                    <h2 class="font-sans font-bold text-4xl sm:text-5xl md:text-7xl uppercase leading-[1.1] tracking-tight text-brand-darkGreen">
+                        A Obra é Sua.<br>
+                        <span class="text-brand-midGreen">A Gestão é Nossa.</span>
+                    </h2>
+                </div>
+                <div class="w-full md:w-1/3 flex items-end pb-0 md:pb-4">
+                    <p class="font-sans text-sm md:text-base leading-relaxed">
+                       Eliminamos as dores de cabeça do dia a dia de sua obra. Somos especialistas no acompanhamento da execução dos serviços realizados no canteiro de obras desde do início ao seu fim.
+                    </p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 fade-up">
+                <div class="h-[40vh] md:h-[70vh] w-full bg-brand-mainGrey/20">
+                    <img src="APRESENTAÇÃO DE MARCA - RENDER7 (4)_compressed_page-0059.jpg" alt="Supervisão" class="img-cover grayscale hover:grayscale-0 transition duration-700">
+                </div>
+                <div class="h-[40vh] md:h-[70vh] w-full mt-0 md:mt-24 bg-brand-mainGrey/20">
+                    <img src="APRESENTAÇÃO DE MARCA - RENDER7 (4)_compressed_page-0058.jpg" alt="Estrutura" class="img-cover grayscale hover:grayscale-0 transition duration-700">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="pilares" class="py-24 md:py-40 px-6 md:px-16 bg-brand-mainBeige text-brand-darkBrown">
+        <div class="max-w-screen-2xl mx-auto">
+            <div class="mb-12 md:mb-24 md:w-2/3 fade-up">
+                <p class="font-sans font-bold text-xs uppercase tracking-[0.3em] text-brand-darkGreen mb-4 md:mb-6 flex items-center gap-4">
+                    <span class="w-8 h-[1px] bg-brand-darkGreen inline-block"></span> Método Corporativo
+                </p>
+                <h2 class="font-sans font-bold text-3xl sm:text-4xl md:text-6xl uppercase tracking-tight leading-snug">
+                    Práticas de gerenciamento e execução focadas no resultado de alto padrão
+                </h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 lg:gap-x-16 gap-y-12 lg:gap-y-16">
+                <div class="border-t border-brand-brown pt-6 md:pt-8 fade-up">
+                    <div class="flex justify-between items-start mb-4 md:mb-6">
+                        <h3 class="font-sans font-bold text-xl md:text-3xl uppercase tracking-wider text-brand-darkGreen">Orquestrada</h3>
+                        <span class="font-display font-black text-brand-white text-lg md:text-2xl">01</span>
+                    </div>
+                    <p class="font-sans font-medium text-sm md:text-lg text-brand-darkSlate leading-relaxed">
+                       Centralizamos toda a comunicação e tomada de decisões técnicas. Gestão unificada com foco total nos interesses do cliente.
+                    </p>
+                </div>
+                <div class="border-t border-brand-brown pt-6 md:pt-8 fade-up">
+                    <div class="flex justify-between items-start mb-4 md:mb-6">
+                        <h3 class="font-sans font-bold text-xl md:text-3xl uppercase tracking-wider text-brand-darkGreen">Controle Ativo</h3>
+                        <span class="font-display font-black text-brand-white text-lg md:text-2xl">02</span>
+                    </div>
+                    <p class="font-sans font-medium text-sm md:text-lg text-brand-darkSlate leading-relaxed">
+                        O grupo conta com  profissionais de arquitetura e engenharia no suporte remoto e no local   desde do cronograma físico e financeiro com transferência nas informações e etapas para nossos clientes
+                    </p>
+                </div>
+                <div class="border-t border-brand-brown pt-6 md:pt-8 fade-up">
+                    <div class="flex justify-between items-start mb-4 md:mb-6">
+                        <h3 class="font-sans font-bold text-xl md:text-3xl uppercase tracking-wider text-brand-darkGreen">Responsabilidade</h3>
+                        <span class="font-display font-black text-brand-white text-lg md:text-2xl">03</span>
+                    </div>
+                    <p class="font-sans font-medium text-sm md:text-lg text-brand-darkSlate leading-relaxed">
+                        Centralizamos toda a comunicação e tomada de decisões técnicas. Gestão unificada com foco total nos interesses do cliente.
+                    </p>
+                </div>
+                <div class="border-t border-brand-brown pt-6 md:pt-8 fade-up">
+                    <div class="flex justify-between items-start mb-4 md:mb-6">
+                        <h3 class="font-sans font-bold text-xl md:text-3xl uppercase tracking-wider text-brand-darkGreen">Entrega</h3>
+                        <span class="font-display font-black text-brand-white text-lg md:text-2xl">04</span>
+                    </div>
+                    <p class="font-sans font-medium text-sm md:text-lg text-brand-darkSlate leading-relaxed">
+                        Transparência do início ao fim da sua obra a ser entregue
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="projetos" class="py-24 md:py-40 px-6 md:px-16 bg-brand-white text-brand-darkGreen">
+        <div class="max-w-screen-2xl mx-auto">
+            
+            <div class="mb-12 md:mb-24 flex flex-col md:flex-row justify-between items-start md:items-end fade-up">
+                <div>
+                    <p class="font-sans font-bold text-xs uppercase tracking-[0.3em] text-brand-brown mb-4 md:mb-6 flex items-center gap-4">
+                        <span class="w-8 h-[1px] bg-brand-brown inline-block"></span> Obras em Foco
+                    </p>
+                    <h2 class="font-sans font-bold text-4xl sm:text-5xl md:text-7xl uppercase tracking-tight text-brand-darkBrown">
+                        Projetos 
+                    </h2>
+                </div>
+                <div class="mt-4 md:mt-0 max-w-sm">
+                    <p class="font-sans font-medium text-brand-darkSlate leading-relaxed text-sm md:text-base">
+                        A materialização do planejamento. Seleção de execuções arquitetônicas e corporativas com o padrão de gestão Render 7.
+                    </p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16">
+                
+                <a href="#" class="project-item group block fade-up cursor-pointer" data-title="Solar Montreaux" data-category="Corporativo / Concluído" data-img="projeto_01/01.jpeg" data-gallery="projeto_01/02.jpeg,projeto_01/03.jpeg,projeto_01/04.jpeg,projeto_01/05.jpeg">
+                    <div class="w-full aspect-[4/3] overflow-hidden mb-4 md:mb-6 bg-brand-lightGreen">
+                        <img src="projeto_01/01.jpeg" alt="Solar Montreaux" class="img-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700 ease-out">
+                    </div>
+                    <div class="flex justify-between items-start border-t border-brand-mainBeige pt-4">
+                        <h3 class="font-display font-black text-xl sm:text-2xl md:text-3xl uppercase text-brand-darkGreen">Solar Montreaux</h3>
+                        <p class="font-sans font-bold text-brand-brown uppercase tracking-widest text-[10px] mt-1 md:mt-2">Corporativo</p>
+                    </div>
+                </a>
+
+                <a href="#" class="project-item group block fade-up cursor-pointer md:mt-16" data-title="Apartamento Alto Padrão" data-category="Residencial / Concluído" data-img="projeto_02/01.jpeg" data-gallery="projeto_02/02.jpeg,projeto_02/03.jpeg,projeto_02/04.jpeg,projeto_02/05.jpeg,projeto_02/06.jpeg,projeto_02/07.jpeg,projeto_02/08.jpeg,projeto_02/09.jpeg">
+                    <div class="w-full aspect-[4/3] overflow-hidden mb-4 md:mb-6 bg-brand-lightGreen">
+                        <img src="projeto_02/01.jpeg" alt="Apartamento Alto Padrão" class="img-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700 ease-out">
+                    </div>
+                    <div class="flex justify-between items-start border-t border-brand-mainBeige pt-4">
+                        <h3 class="font-display font-black text-xl sm:text-2xl md:text-3xl uppercase text-brand-darkGreen">Apartamento Alto Padrão</h3>
+                        <p class="font-sans font-bold text-brand-brown uppercase tracking-widest text-[10px] mt-1 md:mt-2">Residencial</p>
+                    </div>
+                </a>
+
+                <a href="#" class="project-item group block fade-up cursor-pointer" data-title="Residência Contemporânea" data-category="Residencial / Concluído" data-img="projeto_03/01.jpeg" data-gallery="projeto_03/02.jpeg,projeto_03/03.jpeg,projeto_03/04.jpeg,projeto_03/05.jpeg,projeto_03/06.jpeg">
+                    <div class="w-full aspect-[4/3] overflow-hidden mb-4 md:mb-6 bg-brand-lightGreen">
+                        <img src="projeto_03/01.jpeg" alt="Residência Contemporânea" class="img-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700 ease-out">
+                    </div>
+                    <div class="flex justify-between items-start border-t border-brand-mainBeige pt-4">
+                        <h3 class="font-display font-black text-xl sm:text-2xl md:text-3xl uppercase text-brand-darkGreen">Residência Contemporânea</h3>
+                        <p class="font-sans font-bold text-brand-brown uppercase tracking-widest text-[10px] mt-1 md:mt-2">Residencial</p>
+                    </div>
+                </a>
+
+            </div>
+        </div>
+    </section>
+
+    <footer id="contacto" class="bg-brand-black text-brand-white pt-20 md:pt-32 pb-8 md:px-16 px-6">
+        <div class="max-w-screen-2xl mx-auto">
+            <div class="mb-16 md:mb-20 fade-up">
+                <p class="font-sans font-bold text-xs uppercase tracking-[0.3em] text-brand-mainBeige mb-6 flex items-center gap-4">
+                    <span class="w-8 h-[1px] bg-brand-mainBeige inline-block"></span> Linha Direta
+                </p>
+                <h2 class="font-sans font-bold text-2xl sm:text-4xl lg:text-[6rem] uppercase leading-tight md:leading-none tracking-tight break-words">
+                    <a href="mailto:render7obras@gmail.com" class="hover:text-brand-mainBeige transition-colors">
+                        render7<br class="hidden lg:block">obras@gmail.com
+                    </a>
+                </h2>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 md:gap-10 border-t border-brand-darkGreen pt-10 md:pt-12 fade-up font-sans text-xs md:text-sm uppercase tracking-widest text-brand-lightSlate">
+                <div>
+                    <p class="mb-2 md:mb-4 text-brand-mainBeige font-bold">Base Operacional</p>
+                    <p class="text-[10px] leading-relaxed tracking-[0.1em]">Rua Nevada, 610<br>Jardim Quebec, Londrina - PR</p>
+                </div>
+
+                <div class="md:col-start-3 md:text-right">
+                    <p class="mb-2 md:mb-4 text-brand-mainBeige font-bold">Conexões</p>
+                    <ul class="space-y-2">
+                        <li>
+                            <a href="#" class="inline-block text-[10px] tracking-[0.1em] hover:text-brand-white transition">
+                                Instagram <span class="text-brand-darkGreen px-1">/</span> @render7obras
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="inline-block text-[10px] tracking-[0.1em] hover:text-brand-white transition">
+                                Facebook <span class="text-brand-darkGreen px-1">/</span> Render 7
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="mt-16 md:mt-24 pt-6 md:pt-8 border-t border-brand-darkGreen flex flex-col md:flex-row justify-between items-center font-sans font-bold text-[9px] md:text-[10px] uppercase tracking-[0.15em] md:tracking-[0.2em] text-brand-mainGrey gap-4 md:gap-0 text-center md:text-left">
+                <p>&copy; 2026 RENDER 7.</p>
+                <p class="font-display font-black tracking-widest text-brand-white">Especialistas em Administração de Obras</p>
+            </div>
+        </div>
+    </footer>
+
+    <a href="https://wa.me/5543991257955" target="_blank" class="fixed bottom-6 right-6 md:bottom-10 md:right-10 z-[100] bg-[#25D366] text-white p-3 md:p-4 rounded-full shadow-lg hover:scale-110 hover:shadow-xl transition-all duration-300 flex items-center justify-center">
+        <svg viewBox="0 0 24 24" class="w-7 h-7 md:w-9 md:h-9 fill-current">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+        </svg>
+    </a>
+
+    <script>
+        // 1. Lenis Smooth Scroll
+        const lenis = new Lenis({
+            duration: 1.2, 
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), 
+            direction: 'vertical',
+            gestureDirection: 'vertical',
+            smooth: true,
+            smoothTouch: false, // Mantém false para touch nativo em mobile
+        });
+
+        lenis.on('scroll', ScrollTrigger.update);
+        gsap.ticker.add((time) => { lenis.raf(time * 1000); });
+        gsap.ticker.lagSmoothing(0);
+
+        // 2. Animação do Loader Rápida
+        const tlLoader = gsap.timeline();
+        lenis.stop(); // Pára a página durante loading
+
+        tlLoader.fromTo(".loader-logo", 
+                    { opacity: 0, scale: 0.95 },
+                    { opacity: 1, scale: 1, duration: 1, ease: "power3.out" }
+                )
+                .to("#loader", { yPercent: -100, duration: 0.9, ease: "expo.inOut", delay: 0.4 })
+                .call(() => lenis.start()) // Inicia o scroll principal
+                .to(".fade-up", { y: 0, opacity: 1, duration: 0.8, stagger: 0.1, ease: "power3.out" }, "-=0.5");
+
+        // 3. Efeito Fade-up no Scroll
+        gsap.utils.toArray('.fade-up').forEach(element => {
+            gsap.to(element, {
+                y: 0, 
+                opacity: 1, 
+                duration: 1, 
+                ease: "power3.out",
+                scrollTrigger: {
+                    trigger: element,
+                    start: "top 85%", 
+                }
+            });
+        });
+
+        // 4. Menu Overlay
+        const menuBtn = document.getElementById('menu-toggle');
+        const menuOverlay = document.getElementById('menu-overlay');
+        const menuItems = document.querySelectorAll('.menu-item');
+        let menuOpen = false;
+
+        menuBtn.addEventListener('click', () => {
+            menuOpen = !menuOpen;
+            if(menuOpen) {
+                lenis.stop(); 
+                gsap.to(menuOverlay, { y: "0%", duration: 0.4, ease: "power3.inOut" });
+                menuBtn.textContent = 'FECHAR';
+            } else {
+                lenis.start();
+                gsap.to(menuOverlay, { y: "-100%", duration: 0.4, ease: "power3.inOut" });
+                menuBtn.textContent = 'MENU';
+            }
+        });
+
+        menuItems.forEach(item => {
+            item.addEventListener('click', () => {
+                menuOpen = false;
+                lenis.start();
+                gsap.to(menuOverlay, { y: "-100%", duration: 0.4, ease: "power3.inOut" });
+                menuBtn.textContent = 'MENU';
+            });
+        });
+
+        // 5. Modal de Projetos
+        const projectItems = document.querySelectorAll('.project-item');
+        const projectModal = document.getElementById('project-modal');
+        const closeModal = document.getElementById('close-modal');
+        
+        const modalImg = document.getElementById('modal-hero-img');
+        const modalTitle = document.getElementById('modal-title');
+        const modalCategory = document.getElementById('modal-category');
+        const modalGallery = document.getElementById('modal-gallery');
+
+        projectItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                lenis.stop();
+                
+                modalImg.src = item.getAttribute('data-img');
+                modalTitle.textContent = item.getAttribute('data-title');
+                modalCategory.textContent = item.getAttribute('data-category');
+
+                // Populate gallery
+                modalGallery.innerHTML = '';
+                const galleryStr = item.getAttribute('data-gallery') || '';
+                if (galleryStr) {
+                    galleryStr.split(',').forEach(src => {
+                        const div = document.createElement('div');
+                        div.className = 'h-[35vh] md:h-[60vh] bg-brand-lightGreen';
+                        const img = document.createElement('img');
+                        img.src = src.trim();
+                        img.className = 'img-cover grayscale hover:grayscale-0 transition-all duration-500';
+                        div.appendChild(img);
+                        modalGallery.appendChild(div);
+                    });
+                }
+
+                const tl = gsap.timeline();
+                tl.to(projectModal, { clipPath: "inset(0% 0 0 0)", duration: 0.8, ease: "power3.inOut" })
+                  .fromTo(".fade-up-modal", 
+                      { y: 30, opacity: 0 }, 
+                      { y: 0, opacity: 1, duration: 0.8, stagger: 0.1, ease: "power3.out" }, 
+                      "-=0.3"
+                  );
+            });
+        });
+
+        closeModal.addEventListener('click', () => {
+            gsap.to(projectModal, { 
+                clipPath: "inset(100% 0 0 0)", 
+                duration: 0.8, 
+                ease: "power3.inOut",
+                onComplete: () => {
+                    lenis.start(); // Liberta a rolagem principal
+                    projectModal.scrollTo(0, 0); 
+                }
+            });
+        });
+    </script>
+</body>
+</html>
