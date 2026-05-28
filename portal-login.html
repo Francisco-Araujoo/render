@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RENDER 7 | Acesso à Plataforma</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600;700&family=Montserrat:wght@800;900&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            mainBeige: '#C7BFB4',
+                            mainGrey:  '#818781',
+                            darkGreen: '#383B38',
+                            midGreen:  '#595D59',
+                            lightGreen:'#DCE5DC',
+                            brown:     '#725D41',
+                            sand:      '#9C8B73',
+                            darkBrown: '#33230C',
+                            darkSlate: '#293C48',
+                            slate:     '#415F72',
+                            lightSlate:'#B3BFC7',
+                            white:     '#FAFAFA',
+                            black:     '#111111'
+                        }
+                    },
+                    fontFamily: {
+                        sans:    ['Manrope', 'sans-serif'],
+                        display: ['Montserrat', 'sans-serif'],
+                        serif:   ['Playfair Display', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #111111; -webkit-font-smoothing: antialiased; }
+
+        .login-card {
+            background: rgba(250,250,250,0.04);
+            border: 1px solid rgba(199,191,180,0.15);
+            backdrop-filter: blur(12px);
+        }
+
+        .input-field {
+            background: rgba(250,250,250,0.06);
+            border: 1px solid rgba(199,191,180,0.2);
+            color: #FAFAFA;
+            transition: border-color 0.3s, background 0.3s;
+            outline: none;
+        }
+        .input-field::placeholder { color: #818781; }
+        .input-field:focus {
+            border-color: #C7BFB4;
+            background: rgba(250,250,250,0.1);
+        }
+
+        .btn-enter {
+            background: #C7BFB4;
+            color: #111111;
+            transition: background 0.3s, transform 0.2s;
+        }
+        .btn-enter:hover { background: #FAFAFA; transform: translateY(-1px); }
+        .btn-enter:active { transform: translateY(0); }
+        .btn-enter:disabled { background: #595D59; color: #818781; cursor: default; transform: none; }
+
+        .spinner {
+            width: 16px; height: 16px;
+            border: 2px solid rgba(17,17,17,0.3);
+            border-top-color: #111;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .back-link { color: #818781; transition: color 0.3s; }
+        .back-link:hover { color: #C7BFB4; }
+
+        .error-msg {
+            background: rgba(114, 93, 65, 0.2);
+            border: 1px solid rgba(114, 93, 65, 0.5);
+            color: #C7BFB4;
+        }
+
+        .noise-bg {
+            position: fixed; inset: 0; z-index: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
+            pointer-events: none;
+        }
+
+        .accent-line {
+            width: 40px; height: 1px;
+            background: #725D41;
+            display: inline-block;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeUp { animation: fadeUp 0.7s ease forwards; }
+        .delay-1 { animation-delay: 0.1s; opacity: 0; }
+        .delay-2 { animation-delay: 0.25s; opacity: 0; }
+        .delay-3 { animation-delay: 0.4s; opacity: 0; }
+        .delay-4 { animation-delay: 0.55s; opacity: 0; }
+    </style>
+</head>
+<body class="font-sans min-h-screen flex items-center justify-center px-6 py-12 selection:bg-brand-darkGreen selection:text-brand-mainBeige">
+
+    <div class="noise-bg"></div>
+
+    <!-- Decorative lines -->
+    <div class="fixed top-0 left-0 w-px h-full bg-gradient-to-b from-transparent via-brand-mainBeige/10 to-transparent pointer-events-none"></div>
+    <div class="fixed top-0 right-0 w-px h-full bg-gradient-to-b from-transparent via-brand-mainBeige/10 to-transparent pointer-events-none"></div>
+
+    <div class="relative z-10 w-full max-w-md">
+
+        <!-- Header -->
+        <div class="text-center mb-10 animate-fadeUp delay-1">
+            <a href="/index.html" class="inline-block mb-8">
+                <img src="/logos/RENDER7_Simbolo cópia.png" alt="RENDER 7" class="h-10 w-auto object-contain mx-auto opacity-90">
+            </a>
+            <div class="flex items-center justify-center gap-3 mb-4">
+                <span class="accent-line"></span>
+                <p class="font-sans font-bold text-[10px] uppercase tracking-[0.35em] text-brand-brown">Plataforma Restrita</p>
+                <span class="accent-line"></span>
+            </div>
+            <h1 class="font-display font-black text-2xl md:text-3xl uppercase tracking-[0.1em] text-brand-white leading-tight">
+                Área de<br>
+                <span class="text-brand-mainBeige">Acesso</span>
+            </h1>
+        </div>
+
+        <!-- Card -->
+        <div class="login-card rounded-sm p-8 md:p-10 animate-fadeUp delay-2">
+
+            <div id="error-box" class="error-msg rounded-sm px-4 py-3 mb-6 text-xs tracking-wide hidden">
+                E-mail ou senha incorretos. Tente novamente.
+            </div>
+
+            <form id="login-form" novalidate>
+                <div class="mb-5 animate-fadeUp delay-3">
+                    <label class="block font-sans font-bold text-[10px] uppercase tracking-[0.3em] text-brand-mainGrey mb-2">
+                        E-mail de Acesso
+                    </label>
+                    <input
+                        type="email"
+                        id="email"
+                        autocomplete="email"
+                        placeholder="acessorender7@gmail.com"
+                        class="input-field w-full rounded-sm px-4 py-3 text-sm font-sans"
+                    >
+                </div>
+
+                <div class="mb-8 animate-fadeUp delay-3">
+                    <label class="block font-sans font-bold text-[10px] uppercase tracking-[0.3em] text-brand-mainGrey mb-2">
+                        Senha
+                    </label>
+                    <div class="relative">
+                        <input
+                            type="password"
+                            id="password"
+                            autocomplete="current-password"
+                            placeholder="••••••••"
+                            class="input-field w-full rounded-sm px-4 py-3 text-sm font-sans pr-12"
+                        >
+                        <button type="button" id="toggle-pw" class="absolute right-3 top-1/2 -translate-y-1/2 text-brand-mainGrey hover:text-brand-mainBeige transition-colors">
+                            <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" id="submit-btn" class="btn-enter w-full rounded-sm py-3.5 font-display font-black text-xs uppercase tracking-[0.25em] animate-fadeUp delay-4 flex items-center justify-center gap-3">
+                    <span id="btn-text">Entrar na Plataforma</span>
+                    <span id="btn-spinner" class="spinner hidden"></span>
+                </button>
+            </form>
+
+            <div class="mt-8 pt-6 border-t border-brand-mainBeige/10 text-center animate-fadeUp delay-4">
+                <p class="font-sans text-[10px] uppercase tracking-[0.2em] text-brand-mainGrey">
+                    Esta plataforma é de acesso exclusivo.<br>
+                    Para solicitar credenciais, entre em contacto.
+                </p>
+            </div>
+        </div>
+
+        <!-- Footer link -->
+        <div class="text-center mt-8 animate-fadeUp delay-4">
+            <a href="/index.html" class="back-link font-sans font-bold text-[10px] uppercase tracking-[0.25em]">
+                ← Voltar ao Site
+            </a>
+        </div>
+
+    </div>
+
+    <script>
+        // ─── Configuração da API ──────────────────────────────────────────────
+        // Após o deploy substitua pela URL do seu API Gateway:
+        const API_BASE = 'https://kci332chn0.execute-api.us-east-1.amazonaws.com';
+        // Exemplo: 'https://abc123xyz.execute-api.us-east-1.amazonaws.com'
+        // ─────────────────────────────────────────────────────────────────────
+
+        // Redireciona se já estiver logado com sessão válida
+        (function () {
+            const token = sessionStorage.getItem('r7_token');
+            const exp   = parseInt(sessionStorage.getItem('r7_exp') || '0', 10);
+            const role  = sessionStorage.getItem('r7_role');
+            if (token && exp > Date.now()) {
+                if (role === 'admin')     { window.location.href = '/portal-admin.html'; return; }
+                if (role === 'arquiteto') { window.location.href = '/portal-arquiteto.html'; return; }
+                if (role === 'cliente')   { window.location.href = '/portal-cliente.html'; return; }
+            }
+        })();
+
+        // Toggle senha
+        document.getElementById('toggle-pw').addEventListener('click', function () {
+            const pw = document.getElementById('password');
+            pw.type = pw.type === 'password' ? 'text' : 'password';
+        });
+
+        // Login
+        document.getElementById('login-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const email    = document.getElementById('email').value.trim().toLowerCase();
+            const password = document.getElementById('password').value;
+            const errBox   = document.getElementById('error-box');
+            const btn      = document.getElementById('submit-btn');
+            const btnText  = document.getElementById('btn-text');
+            const spinner  = document.getElementById('btn-spinner');
+
+            errBox.classList.add('hidden');
+
+            if (!email || !password) {
+                errBox.textContent = 'Preencha e-mail e senha.';
+                errBox.classList.remove('hidden');
+                return;
+            }
+
+            btn.disabled = true;
+            btnText.textContent = 'Verificando...';
+            spinner.classList.remove('hidden');
+
+            try {
+                const res  = await fetch(`${API_BASE}/auth/login`, {
+                    method:  'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body:    JSON.stringify({ email, password }),
+                });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    errBox.textContent = data.error || 'Credenciais inválidas.';
+                    errBox.classList.remove('hidden');
+                    return;
+                }
+
+                // Salva sessão — expira em 24h
+                const expAt = Date.now() + 24 * 60 * 60 * 1000;
+                sessionStorage.setItem('r7_token', data.token);
+                sessionStorage.setItem('r7_role',  data.user.role);
+                sessionStorage.setItem('r7_user',  data.user.email);
+                sessionStorage.setItem('r7_name',  data.user.name);
+                sessionStorage.setItem('r7_uid',   data.user.id);
+                sessionStorage.setItem('r7_exp',   expAt);
+                if (data.user.architect_id) {
+                    sessionStorage.setItem('r7_architect_id', data.user.architect_id);
+                }
+
+                const redirects = {
+                    admin:     '/portal-admin.html',
+                    arquiteto: '/portal-arquiteto.html',
+                    cliente:   '/portal-cliente.html',
+                };
+                window.location.href = redirects[data.user.role] || '/portal-login.html';
+
+            } catch (err) {
+                errBox.textContent = 'Falha de conexão. Verifique sua internet.';
+                errBox.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                btnText.textContent = 'Entrar na Plataforma';
+                spinner.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

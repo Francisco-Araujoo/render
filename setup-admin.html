@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RENDER 7 | Configuração Inicial</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600;700&family=Montserrat:wght@800;900&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            mainBeige: '#C7BFB4',
+                            mainGrey:  '#818781',
+                            darkGreen: '#383B38',
+                            midGreen:  '#595D59',
+                            lightGreen:'#DCE5DC',
+                            brown:     '#725D41',
+                            sand:      '#9C8B73',
+                            darkBrown: '#33230C',
+                            darkSlate: '#293C48',
+                            slate:     '#415F72',
+                            lightSlate:'#B3BFC7',
+                            white:     '#FAFAFA',
+                            black:     '#111111'
+                        }
+                    },
+                    fontFamily: {
+                        sans:    ['Manrope', 'sans-serif'],
+                        display: ['Montserrat', 'sans-serif'],
+                        serif:   ['Playfair Display', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #111111; -webkit-font-smoothing: antialiased; }
+
+        .card {
+            background: rgba(250,250,250,0.04);
+            border: 1px solid rgba(199,191,180,0.15);
+            backdrop-filter: blur(12px);
+        }
+
+        .input-field {
+            background: rgba(250,250,250,0.06);
+            border: 1px solid rgba(199,191,180,0.2);
+            color: #FAFAFA;
+            transition: border-color 0.3s, background 0.3s;
+            outline: none;
+        }
+        .input-field::placeholder { color: #818781; }
+        .input-field:focus {
+            border-color: #C7BFB4;
+            background: rgba(250,250,250,0.1);
+        }
+
+        .btn-primary {
+            background: #C7BFB4;
+            color: #111111;
+            transition: background 0.3s, transform 0.2s;
+        }
+        .btn-primary:hover { background: #FAFAFA; transform: translateY(-1px); }
+        .btn-primary:active { transform: translateY(0); }
+        .btn-primary:disabled { background: #595D59; color: #818781; cursor: default; transform: none; }
+
+        .spinner {
+            width: 16px; height: 16px;
+            border: 2px solid rgba(17,17,17,0.3);
+            border-top-color: #111;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: 'Manrope', sans-serif;
+            font-weight: 500;
+        }
+        .alert-error   { background: rgba(239,68,68,0.12);  border: 1px solid rgba(239,68,68,0.3);  color: #fca5a5; }
+        .alert-success { background: rgba(34,197,94,0.12);  border: 1px solid rgba(34,197,94,0.3);  color: #86efac; }
+        .alert-info    { background: rgba(199,191,180,0.08); border: 1px solid rgba(199,191,180,0.2); color: #C7BFB4; }
+
+        .badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(114,93,65,0.2);
+            border: 1px solid rgba(114,93,65,0.4);
+            color: #9C8B73;
+            padding: 4px 10px;
+            border-radius: 99px;
+            font-size: 11px;
+            font-family: 'Manrope', sans-serif;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center px-4 py-12">
+
+    <div class="w-full max-w-md">
+
+        <!-- Logo -->
+        <div class="text-center mb-10">
+            <p class="font-display font-black text-4xl tracking-tighter text-brand-white mb-1">RENDER <span style="color:#C7BFB4">7</span></p>
+            <p class="font-serif italic text-brand-mainGrey text-sm">Configuração Inicial do Sistema</p>
+        </div>
+
+        <!-- Card -->
+        <div class="card rounded-2xl p-8">
+
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="font-display font-black text-lg uppercase tracking-tight text-brand-white">Criar Admin</h2>
+                    <p class="font-sans text-brand-mainGrey text-xs mt-0.5">Executado uma única vez após o deploy</p>
+                </div>
+                <span class="badge">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    One-time
+                </span>
+            </div>
+
+            <!-- Info -->
+            <div class="alert alert-info mb-6">
+                O admin <strong>Carlos</strong> será criado com o e-mail <strong>render7obras@gmail.com</strong>.<br>
+                Defina abaixo a senha de acesso.
+            </div>
+
+            <!-- Mensagem de retorno -->
+            <div id="msg" class="mb-4 hidden"></div>
+
+            <!-- Formulário -->
+            <form id="setup-form" onsubmit="setupAdmin(event)">
+                <div class="mb-4">
+                    <label class="block font-sans font-700 text-xs uppercase tracking-widest text-brand-mainBeige mb-2">Nova Senha *</label>
+                    <input
+                        id="password"
+                        type="password"
+                        class="input-field w-full rounded-lg px-4 py-3 font-sans text-sm"
+                        placeholder="Mínimo 6 caracteres"
+                        autocomplete="new-password"
+                        required
+                        minlength="6"
+                    >
+                </div>
+
+                <div class="mb-6">
+                    <label class="block font-sans font-700 text-xs uppercase tracking-widest text-brand-mainBeige mb-2">Confirmar Senha *</label>
+                    <input
+                        id="confirm"
+                        type="password"
+                        class="input-field w-full rounded-lg px-4 py-3 font-sans text-sm"
+                        placeholder="Repita a senha"
+                        autocomplete="new-password"
+                        required
+                        minlength="6"
+                    >
+                </div>
+
+                <button id="btn-submit" type="submit" class="btn-primary w-full py-3 rounded-lg font-sans font-700 text-sm uppercase tracking-widest">
+                    Criar Admin Carlos
+                </button>
+            </form>
+
+            <div class="mt-6 text-center">
+                <a href="portal-login.html" class="font-sans text-xs text-brand-mainGrey hover:text-brand-mainBeige transition-colors">
+                    ← Voltar para o login
+                </a>
+            </div>
+        </div>
+
+        <!-- Aviso -->
+        <p class="text-center font-sans text-xs text-brand-midGreen mt-6">
+            Após criar o admin, esta página pode ser removida do servidor.
+        </p>
+
+    </div>
+
+    <script>
+        const API_BASE = 'https://kci332chn0.execute-api.us-east-1.amazonaws.com';
+
+        function showMsg(type, text) {
+            const el = document.getElementById('msg');
+            el.className = `alert alert-${type} mb-4`;
+            el.innerHTML = text;
+            el.classList.remove('hidden');
+        }
+
+        async function setupAdmin(e) {
+            e.preventDefault();
+
+            const password = document.getElementById('password').value.trim();
+            const confirm  = document.getElementById('confirm').value.trim();
+            const btn      = document.getElementById('btn-submit');
+
+            if (password !== confirm) {
+                showMsg('error', 'As senhas não coincidem.');
+                return;
+            }
+            if (password.length < 6) {
+                showMsg('error', 'A senha deve ter no mínimo 6 caracteres.');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner mr-2"></span> Criando...';
+
+            try {
+                const res  = await fetch(`${API_BASE}/auth/setup-admin`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    showMsg('success', `✓ ${data.message || 'Admin criado com sucesso!'} <br><a href="portal-login.html" class="underline font-bold">Ir para o login →</a>`);
+                    document.getElementById('setup-form').style.display = 'none';
+                } else if (res.status === 409) {
+                    showMsg('info', 'Admin já existe. <a href="portal-login.html" class="underline font-bold">Ir para o login →</a>');
+                    document.getElementById('setup-form').style.display = 'none';
+                } else {
+                    showMsg('error', data.error || 'Erro ao criar admin.');
+                    btn.disabled = false;
+                    btn.textContent = 'Criar Admin Carlos';
+                }
+            } catch (err) {
+                showMsg('error', 'Falha na conexão com a API. Verifique o console.');
+                console.error(err);
+                btn.disabled = false;
+                btn.textContent = 'Criar Admin Carlos';
+            }
+        }
+    </script>
+</body>
+</html>

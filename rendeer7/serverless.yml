@@ -1,0 +1,173 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: render7
+# "app" enables Serverless Framework Dashboard features and sharing them with other Services.
+app: my-app
+# "service" is the name of this project. This will also be added to your AWS resource names.
+service: my-service
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  # Uncomment to easily set up a custom domain. Read the docs for more details:
+  # https://www.serverless.com/framework/docs/providers/aws/guide/domains
+  # domain: api.example.com
+
+  httpApi:
+    cors:
+      allowedOrigins:
+        - '*'
+      allowedHeaders:
+        - Content-Type
+        - Authorization
+      allowedMethods:
+        - GET
+        - POST
+        - PUT
+        - DELETE
+        - OPTIONS
+
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - ssm:GetParameter
+            - ssm:GetParameters
+            - ssm:PutParameter
+          Resource: "arn:aws:ssm:*:*:parameter/render7/*"
+        - Effect: Allow
+          Action:
+            - kms:Decrypt
+            - kms:GenerateDataKey
+          Resource: "*"
+
+functions:
+  hello:
+    handler: handler.hello
+    events:
+      - httpApi:
+          path: /
+          method: get
+
+  # ── Setup (one-time) ──────────────────────────────────
+  setupSSM:
+    handler: src/handlers/setupSSM.setupSSM
+    events:
+      - httpApi:
+          path: /setup/ssm
+          method: post
+
+  # ── Auth ──────────────────────────────────────────────
+  authLogin:
+    handler: src/handlers/auth.login
+    events:
+      - httpApi:
+          path: /auth/login
+          method: post
+
+  authSetupAdmin:
+    handler: src/handlers/auth.setupAdmin
+    events:
+      - httpApi:
+          path: /auth/setup-admin
+          method: post
+
+  authChangePassword:
+    handler: src/handlers/auth.changePassword
+    events:
+      - httpApi:
+          path: /auth/change-password
+          method: post
+
+  # ── Users ─────────────────────────────────────────────
+  usersMe:
+    handler: src/handlers/users.getMe
+    events:
+      - httpApi:
+          path: /users/me
+          method: get
+
+  usersListArquitetos:
+    handler: src/handlers/users.listArquitetos
+    events:
+      - httpApi:
+          path: /users/arquitetos
+          method: get
+
+  usersCreateArquiteto:
+    handler: src/handlers/users.createArquiteto
+    events:
+      - httpApi:
+          path: /users/arquitetos
+          method: post
+
+  usersListClientesByArquiteto:
+    handler: src/handlers/users.listClientesByArquiteto
+    events:
+      - httpApi:
+          path: /users/arquitetos/{id}/clientes
+          method: get
+
+  usersListClientes:
+    handler: src/handlers/users.listClientes
+    events:
+      - httpApi:
+          path: /users/clientes
+          method: get
+
+  usersCreateCliente:
+    handler: src/handlers/users.createCliente
+    events:
+      - httpApi:
+          path: /users/clientes
+          method: post
+
+  usersDeleteArquiteto:
+    handler: src/handlers/users.deleteArquiteto
+    events:
+      - httpApi:
+          path: /users/arquitetos/{id}
+          method: delete
+
+  usersDeleteCliente:
+    handler: src/handlers/users.deleteCliente
+    events:
+      - httpApi:
+          path: /users/clientes/{id}
+          method: delete
+
+  # ── Projects ──────────────────────────────────────────
+  projectsList:
+    handler: src/handlers/projects.list
+    events:
+      - httpApi:
+          path: /projects
+          method: get
+
+  projectsGetOne:
+    handler: src/handlers/projects.getOne
+    events:
+      - httpApi:
+          path: /projects/{id}
+          method: get
+
+  projectsCreate:
+    handler: src/handlers/projects.create
+    events:
+      - httpApi:
+          path: /projects
+          method: post
+
+  projectsDelete:
+    handler: src/handlers/projects.remove
+    events:
+      - httpApi:
+          path: /projects/{id}
+          method: delete
+
+  projectsUpdate:
+    handler: src/handlers/projects.update
+    events:
+      - httpApi:
+          path: /projects/{id}
+          method: put

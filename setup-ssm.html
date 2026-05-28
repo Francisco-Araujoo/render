@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RENDER 7 | Setup SSM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600;700&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { brand: {
+                mainBeige:'#C7BFB4', mainGrey:'#818781', darkGreen:'#383B38',
+                midGreen:'#595D59', brown:'#725D41', white:'#FAFAFA', black:'#111111'
+            }}, fontFamily: { sans:['Manrope','sans-serif'], display:['Montserrat','sans-serif'] } } }
+        }
+    </script>
+    <style>
+        body { background-color: #111111; -webkit-font-smoothing: antialiased; }
+        .card { background: rgba(250,250,250,0.04); border: 1px solid rgba(199,191,180,0.15); }
+        .input-field {
+            background: rgba(250,250,250,0.06); border: 1px solid rgba(199,191,180,0.2);
+            color: #FAFAFA; outline: none; transition: border-color 0.3s;
+        }
+        .input-field::placeholder { color: #818781; }
+        .input-field:focus { border-color: #C7BFB4; background: rgba(250,250,250,0.1); }
+        .lbl { display:block; font-family:'Manrope',sans-serif; font-weight:700; font-size:10px;
+               text-transform:uppercase; letter-spacing:.15em; color:#C7BFB4; margin-bottom:6px; }
+        .btn { background:#C7BFB4; color:#111; font-family:'Manrope',sans-serif; font-weight:700;
+               font-size:12px; text-transform:uppercase; letter-spacing:.15em;
+               transition: background .3s, transform .2s; border:none; cursor:pointer; }
+        .btn:hover { background:#FAFAFA; transform:translateY(-1px); }
+        .btn:disabled { background:#595D59; color:#818781; cursor:default; transform:none; }
+        .alert { padding:12px 16px; border-radius:6px; font-size:13px; font-family:'Manrope',sans-serif; font-weight:500; }
+        .alert-error   { background:rgba(239,68,68,.12);  border:1px solid rgba(239,68,68,.3);  color:#fca5a5; }
+        .alert-success { background:rgba(34,197,94,.12);  border:1px solid rgba(34,197,94,.3);  color:#86efac; }
+        .spinner { width:15px; height:15px; border:2px solid rgba(17,17,17,.3); border-top-color:#111;
+                   border-radius:50%; animation:spin .7s linear infinite; display:inline-block; vertical-align:middle; }
+        @keyframes spin { to { transform:rotate(360deg); } }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center px-4 py-12">
+<div class="w-full max-w-lg">
+
+    <div class="text-center mb-8">
+        <p class="font-display font-black text-3xl tracking-tighter text-brand-white mb-1">RENDER <span style="color:#C7BFB4">7</span></p>
+        <p class="font-sans text-brand-mainGrey text-sm">Configuração do Banco de Dados — SSM Parameter Store</p>
+    </div>
+
+    <div class="card rounded-2xl p-8">
+        <h2 class="font-display font-black text-base uppercase tracking-tight text-brand-white mb-1">Parâmetros de Conexão</h2>
+        <p class="font-sans text-brand-mainGrey text-xs mb-6">Executado uma única vez. Os dados são gravados criptografados no AWS SSM.</p>
+
+        <div id="msg" class="mb-4 hidden"></div>
+
+        <form id="form" onsubmit="submitSetup(event)" class="space-y-4">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="lbl">Host do Banco *</label>
+                    <input id="DB_HOST" class="input-field w-full rounded-lg px-4 py-3 font-sans text-sm"
+                        value="render7.cclemg2mm332.us-east-1.rds.amazonaws.com" required>
+                </div>
+                <div>
+                    <label class="lbl">Porta</label>
+                    <input id="DB_PORT" class="input-field w-full rounded-lg px-4 py-3 font-sans text-sm"
+                        value="3306">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="lbl">Nome do Banco *</label>
+                    <input id="DB_NAME" class="input-field w-full rounded-lg px-4 py-3 font-sans text-sm"
+                        value="render7" required>
+                </div>
+                <div>
+                    <label class="lbl">Usuário *</label>
+                    <input id="DB_USER" class="input-field w-full rounded-lg px-4 py-3 font-sans text-sm"
+                        value="root" required>
+                </div>
+            </div>
+
+            <div>
+                <label class="lbl">Senha do Banco * <span style="color:#818781;text-transform:none;letter-spacing:0">(SecureString)</span></label>
+                <input id="DB_PASS" type="password" class="input-field w-full rounded-lg px-4 py-3 font-sans text-sm"
+                    placeholder="Senha do MySQL" required>
+            </div>
+
+            <div>
+                <label class="lbl">SSL</label>
+                <select id="DB_SSL" class="input-field w-full rounded-lg px-4 py-3 font-sans text-sm">
+                    <option value="false" selected>false — sem SSL</option>
+                    <option value="true">true — com SSL</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="lbl">JWT Secret * <span style="color:#818781;text-transform:none;letter-spacing:0">(SecureString)</span></label>
+                <input id="JWT_SECRET" class="input-field w-full rounded-lg px-4 py-3 font-sans text-sm"
+                    placeholder="String longa aleatória para assinar os tokens" required>
+                <p class="font-sans text-xs text-brand-mainGrey mt-1">Ex: render7-jwt-2026-Xk9mQpL3wRz7vN2</p>
+            </div>
+
+            <button id="btn" type="submit" class="btn w-full py-3 rounded-lg mt-2">
+                Gravar Parâmetros no SSM
+            </button>
+        </form>
+
+        <div class="mt-6 text-center">
+            <a href="setup-admin.html" class="font-sans text-xs text-brand-mainGrey hover:text-brand-mainBeige transition-colors">
+                Após configurar → Criar Admin Carlos →
+            </a>
+        </div>
+    </div>
+
+    <p class="text-center font-sans text-xs text-brand-midGreen mt-4">
+        Token de acesso: <code style="color:#9C8B73">render7-setup-2026</code> — remova esta página após o setup.
+    </p>
+</div>
+
+<script>
+    const API_BASE    = 'https://kci332chn0.execute-api.us-east-1.amazonaws.com';
+    const SETUP_TOKEN = 'render7-setup-2026';
+
+    function showMsg(type, html) {
+        const el = document.getElementById('msg');
+        el.className = `alert alert-${type} mb-4`;
+        el.innerHTML = html;
+        el.classList.remove('hidden');
+    }
+
+    async function submitSetup(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner mr-2"></span> Gravando...';
+
+        const payload = {
+            token:      SETUP_TOKEN,
+            DB_HOST:    document.getElementById('DB_HOST').value.trim(),
+            DB_PORT:    document.getElementById('DB_PORT').value.trim(),
+            DB_NAME:    document.getElementById('DB_NAME').value.trim(),
+            DB_USER:    document.getElementById('DB_USER').value.trim(),
+            DB_PASS:    document.getElementById('DB_PASS').value,
+            DB_SSL:     document.getElementById('DB_SSL').value,
+            JWT_SECRET: document.getElementById('JWT_SECRET').value.trim(),
+        };
+
+        try {
+            const res  = await fetch(`${API_BASE}/setup/ssm`, {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify(payload),
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                showMsg('success', `✓ ${data.message} <br><a href="setup-admin.html" class="underline font-bold">Criar Admin Carlos →</a>`);
+                document.getElementById('form').style.display = 'none';
+            } else {
+                showMsg('error', data.error || 'Erro desconhecido.');
+                btn.disabled = false;
+                btn.textContent = 'Gravar Parâmetros no SSM';
+            }
+        } catch (err) {
+            showMsg('error', 'Falha na conexão com a API.');
+            console.error(err);
+            btn.disabled = false;
+            btn.textContent = 'Gravar Parâmetros no SSM';
+        }
+    }
+</script>
+</body>
+</html>

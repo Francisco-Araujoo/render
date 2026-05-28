@@ -1,0 +1,11 @@
+{
+  "name": "render7-api",
+  "version": "1.0.0",
+  "description": "Render 7 — API backend (Lambda + MySQL)",
+  "dependencies": {
+    "@aws-sdk/client-ssm": "^3.600.0",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.9.0"
+  }
+}
