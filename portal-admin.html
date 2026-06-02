@@ -362,6 +362,11 @@
         <div class="mt-4 pt-4 border-t border-brand-midGreen/30">
             <p class="font-sans font-bold text-[8px] uppercase tracking-[0.3em] text-brand-mainGrey/50 px-3 mb-3">Conta</p>
 
+            <div class="sidebar-nav-item" data-panel="minha-conta">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                Minha Conta
+            </div>
+
             <div class="sidebar-nav-item" id="logout-btn">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
                 Sair
@@ -659,6 +664,56 @@
             </div>
         </section>
 
+        <!-- ===== PANEL: MINHA CONTA ===== -->
+        <section id="panel-minha-conta" class="panel">
+            <div class="mb-8">
+                <h1 class="font-display font-black text-2xl md:text-3xl uppercase tracking-tight text-brand-darkGreen mb-1">Minha Conta</h1>
+                <p class="font-sans text-brand-mainGrey text-sm">Atualize suas credenciais de acesso ao painel administrativo.</p>
+            </div>
+
+            <div class="max-w-lg">
+                <!-- Alterar e-mail -->
+                <div class="stat-card mb-6">
+                    <h2 class="font-sans font-bold text-[10px] uppercase tracking-[0.3em] text-brand-midGreen mb-5 flex items-center gap-2">
+                        <span class="w-5 h-[1px] bg-brand-midGreen inline-block"></span> Alterar E-mail
+                    </h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="form-label">Novo e-mail *</label>
+                            <input type="email" id="acc-email" class="form-input" placeholder="novo@email.com">
+                        </div>
+                        <div>
+                            <label class="form-label">Senha atual (confirmação) *</label>
+                            <input type="password" id="acc-email-password" class="form-input" placeholder="Digite sua senha atual">
+                        </div>
+                        <button class="btn-primary" onclick="updateAdminEmail()">Salvar Novo E-mail</button>
+                    </div>
+                </div>
+
+                <!-- Alterar senha -->
+                <div class="stat-card">
+                    <h2 class="font-sans font-bold text-[10px] uppercase tracking-[0.3em] text-brand-midGreen mb-5 flex items-center gap-2">
+                        <span class="w-5 h-[1px] bg-brand-midGreen inline-block"></span> Alterar Senha
+                    </h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="form-label">Senha atual *</label>
+                            <input type="password" id="acc-current-password" class="form-input" placeholder="Sua senha atual">
+                        </div>
+                        <div>
+                            <label class="form-label">Nova senha *</label>
+                            <input type="password" id="acc-new-password" class="form-input" placeholder="Mínimo 6 caracteres">
+                        </div>
+                        <div>
+                            <label class="form-label">Confirmar nova senha *</label>
+                            <input type="password" id="acc-confirm-password" class="form-input" placeholder="Repita a nova senha">
+                        </div>
+                        <button class="btn-primary" onclick="updateAdminPassword()">Salvar Nova Senha</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- ===== PANEL: CLIENTES ===== -->
         <section id="panel-clientes" class="panel">
             <div class="mb-8 flex items-start justify-between gap-4 flex-wrap">
@@ -771,6 +826,7 @@ const panelLabels = {
     'projects-list': 'Projetos Enviados',
     'arquitetos':    'Arquitetos',
     'clientes':      'Clientes',
+    'minha-conta':   'Minha Conta',
 };
 
 function switchPanel(name) {
@@ -786,6 +842,7 @@ function switchPanel(name) {
     if (name === 'arquitetos')    renderArquitetos();
     if (name === 'clientes')      renderClientes();
     if (name === 'add-project')   loadArchitectsForForm();
+    if (name === 'minha-conta')   prefillAccountEmail();
 
     document.getElementById('sidebar').classList.remove('open');
     document.getElementById('sidebar-overlay').classList.remove('open');
@@ -1433,6 +1490,61 @@ async function saveEditProject() {
         showToast('⚠ Erro de conexão.');
     } finally {
         btn.disabled = false; btn.textContent = 'Salvar Alterações';
+    }
+}
+
+// ─── Minha Conta ─────────────────────────────────────────────────────────────
+function prefillAccountEmail() {
+    const current = sessionStorage.getItem('r7_user') || '';
+    document.getElementById('acc-email').value = current;
+    document.getElementById('acc-email-password').value = '';
+    document.getElementById('acc-current-password').value = '';
+    document.getElementById('acc-new-password').value = '';
+    document.getElementById('acc-confirm-password').value = '';
+}
+
+async function updateAdminEmail() {
+    const email    = document.getElementById('acc-email').value.trim();
+    const password = document.getElementById('acc-email-password').value;
+    if (!email)    { showToast('⚠ Informe o novo e-mail.'); return; }
+    if (!password) { showToast('⚠ Informe sua senha atual para confirmar.'); return; }
+    // Validação básica de formato
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast('⚠ E-mail inválido.'); return; }
+
+    try {
+        const res  = await api('PUT', '/users/me', { email, current_password: password });
+        if (!res) return;
+        const data = await res.json();
+        if (!res.ok) { showToast('⚠ ' + (data.error || 'Erro ao atualizar e-mail.')); return; }
+        sessionStorage.setItem('r7_user', email);
+        document.getElementById('sidebar-user-email').textContent = email;
+        document.getElementById('acc-email-password').value = '';
+        showToast('✓ E-mail atualizado com sucesso!');
+    } catch (e) {
+        showToast('⚠ Erro de conexão.');
+    }
+}
+
+async function updateAdminPassword() {
+    const current  = document.getElementById('acc-current-password').value;
+    const next     = document.getElementById('acc-new-password').value;
+    const confirm  = document.getElementById('acc-confirm-password').value;
+    if (!current) { showToast('⚠ Informe sua senha atual.'); return; }
+    if (!next)    { showToast('⚠ Informe a nova senha.'); return; }
+    if (next.length < 6) { showToast('⚠ A nova senha deve ter ao menos 6 caracteres.'); return; }
+    if (next !== confirm) { showToast('⚠ As senhas não coincidem.'); return; }
+
+    try {
+        const res  = await api('PUT', '/users/me', { current_password: current, new_password: next });
+        if (!res) return;
+        const data = await res.json();
+        if (!res.ok) { showToast('⚠ ' + (data.error || 'Erro ao atualizar senha.')); return; }
+        document.getElementById('acc-current-password').value = '';
+        document.getElementById('acc-new-password').value = '';
+        document.getElementById('acc-confirm-password').value = '';
+        showToast('✓ Senha atualizada com sucesso!');
+    } catch (e) {
+        showToast('⚠ Erro de conexão.');
     }
 }
 

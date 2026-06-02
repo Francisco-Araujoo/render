@@ -87,6 +87,13 @@ functions:
           path: /users/me
           method: get
 
+  usersMeUpdate:
+    handler: src/handlers/users.updateMe
+    events:
+      - httpApi:
+          path: /users/me
+          method: put
+
   usersListArquitetos:
     handler: src/handlers/users.listArquitetos
     events:

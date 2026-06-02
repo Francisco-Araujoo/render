@@ -384,3 +384,80 @@ module.exports.getMe = async (event) => {
         return resp(500, { error: 'Erro interno.' });
     }
 };
+
+// -------------------------------------------------------
+// PUT /users/me
+// Atualiza e-mail e/ou senha do usuário logado.
+// Body: { current_password, email?, new_password? }
+// Pelo menos um de email ou new_password deve ser enviado.
+// -------------------------------------------------------
+module.exports.updateMe = async (event) => {
+    const pre = preflight(event);
+    if (pre) return pre;
+
+    const { err, payload } = await auth(event);
+    if (err) return err;
+
+    try {
+        const body            = JSON.parse(event.body || '{}');
+        const currentPassword = (body.current_password || '').trim();
+        const newEmail        = body.email        ? body.email.trim().toLowerCase()       : null;
+        const newPassword     = body.new_password  ? body.new_password.trim()              : null;
+
+        if (!currentPassword) {
+            return resp(400, { error: 'Senha atual obrigatória para confirmar a alteração.' });
+        }
+        if (!newEmail && !newPassword) {
+            return resp(400, { error: 'Informe o novo e-mail ou a nova senha.' });
+        }
+        if (newPassword && newPassword.length < 6) {
+            return resp(400, { error: 'A nova senha deve ter no mínimo 6 caracteres.' });
+        }
+        if (newEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) {
+            return resp(400, { error: 'Formato de e-mail inválido.' });
+        }
+
+        // Determina tabela
+        const table = payload.role === 'admin'
+            ? 'admins'
+            : payload.role === 'arquiteto'
+                ? 'architects'
+                : 'clients';
+
+        // Busca hash atual
+        const { rows: userRows } = await query(
+            `SELECT password_hash FROM ${table} WHERE id = ? AND active = 1`,
+            [payload.id]
+        );
+        if (!userRows.length) return resp(404, { error: 'Usuário não encontrado.' });
+
+        const valid = await bcrypt.compare(currentPassword, userRows[0].password_hash);
+        if (!valid) return resp(401, { error: 'Senha atual incorreta.' });
+
+        // Verifica duplicata de e-mail (se trocando)
+        if (newEmail) {
+            const dup = await query(
+                `SELECT email FROM admins     WHERE email = ? AND id != ?
+                 UNION ALL
+                 SELECT email FROM architects WHERE email = ?
+                 UNION ALL
+                 SELECT email FROM clients    WHERE email = ?
+                 LIMIT 1`,
+                [newEmail, payload.role === 'admin' ? payload.id : -1, newEmail, newEmail]
+            );
+            if (dup.rows.length) return resp(409, { error: 'E-mail já cadastrado.' });
+
+            await query(`UPDATE ${table} SET email = ? WHERE id = ?`, [newEmail, payload.id]);
+        }
+
+        if (newPassword) {
+            const hash = await bcrypt.hash(newPassword, 12);
+            await query(`UPDATE ${table} SET password_hash = ? WHERE id = ?`, [hash, payload.id]);
+        }
+
+        return resp(200, { message: 'Dados atualizados com sucesso.' });
+    } catch (e) {
+        console.error('updateMe:', e);
+        return resp(500, { error: 'Erro interno.' });
+    }
+};
