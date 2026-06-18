@@ -1,0 +1,17 @@
+{
+  "name": "render7-email-relay",
+  "version": "1.0.0",
+  "description": "Relay HTTP para envio de e-mails via SMTP Kinghost — hospedado no Render",
+  "main": "email-relay.js",
+  "scripts": {
+    "start": "node email-relay.js",
+    "relay:start": "node email-relay.js"
+  },
+  "dependencies": {
+    "express": "^4.18.3",
+    "nodemailer": "^9.0.1"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

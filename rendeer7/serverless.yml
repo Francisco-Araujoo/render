@@ -8,9 +8,9 @@ service: my-service
 provider:
   name: aws
   runtime: nodejs20.x
-  # Uncomment to easily set up a custom domain. Read the docs for more details:
-  # https://www.serverless.com/framework/docs/providers/aws/guide/domains
-  # domain: api.example.com
+  environment:
+    EMAIL_RELAY_URL: ${env:EMAIL_RELAY_URL, ''}
+    EMAIL_RELAY_TOKEN: ${env:EMAIL_RELAY_TOKEN, ''}
 
   httpApi:
     cors:
@@ -49,7 +49,6 @@ functions:
           path: /
           method: get
 
-  # ── Setup (one-time) ──────────────────────────────────
   setupSSM:
     handler: src/handlers/setupSSM.setupSSM
     events:
@@ -57,7 +56,6 @@ functions:
           path: /setup/ssm
           method: post
 
-  # ── Auth ──────────────────────────────────────────────
   authLogin:
     handler: src/handlers/auth.login
     events:
@@ -79,7 +77,6 @@ functions:
           path: /auth/change-password
           method: post
 
-  # ── Users ─────────────────────────────────────────────
   usersMe:
     handler: src/handlers/users.getMe
     events:
@@ -143,7 +140,6 @@ functions:
           path: /users/clientes/{id}
           method: delete
 
-  # ── Projects ──────────────────────────────────────────
   projectsList:
     handler: src/handlers/projects.list
     events:
@@ -160,6 +156,7 @@ functions:
 
   projectsCreate:
     handler: src/handlers/projects.create
+    timeout: 15
     events:
       - httpApi:
           path: /projects
@@ -174,6 +171,7 @@ functions:
 
   projectsUpdate:
     handler: src/handlers/projects.update
+    timeout: 15
     events:
       - httpApi:
           path: /projects/{id}
