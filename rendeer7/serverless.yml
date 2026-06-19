@@ -9,6 +9,26 @@ provider:
   name: aws
   runtime: nodejs20.x
   environment:
+    # Email Configuration
+    EMAIL_PROVIDER: ${env:EMAIL_PROVIDER, 'kinghost'}
+    EMAIL_USER: ${env:EMAIL_USER, ''}
+    EMAIL_PASS: ${env:EMAIL_PASS, ''}
+    EMAIL_HOST: ${env:EMAIL_HOST, 'smtp.kinghost.net'}
+    EMAIL_PORT: ${env:EMAIL_PORT, '587'}
+    EMAIL_FROM: ${env:EMAIL_FROM, 'Render 7 <comercial@render7.com.br>'}
+    
+    # Database Configuration
+    DB_HOST: ${env:DB_HOST, ''}
+    DB_PORT: ${env:DB_PORT, '3306'}
+    DB_NAME: ${env:DB_NAME, 'render7'}
+    DB_USER: ${env:DB_USER, ''}
+    DB_PASS: ${env:DB_PASS, ''}
+    DB_SSL: ${env:DB_SSL, 'false'}
+    
+    # JWT
+    JWT_SECRET: ${env:JWT_SECRET, 'sua-chave-jwt-super-segura'}
+    
+    # Legacy
     EMAIL_RELAY_URL: ${env:EMAIL_RELAY_URL, ''}
     EMAIL_RELAY_TOKEN: ${env:EMAIL_RELAY_TOKEN, ''}
 
@@ -156,7 +176,7 @@ functions:
 
   projectsCreate:
     handler: src/handlers/projects.create
-    timeout: 15
+    timeout: 30
     events:
       - httpApi:
           path: /projects
@@ -171,7 +191,7 @@ functions:
 
   projectsUpdate:
     handler: src/handlers/projects.update
-    timeout: 15
+    timeout: 30
     events:
       - httpApi:
           path: /projects/{id}

@@ -1,88 +1,29 @@
 'use strict';
-const https      = require('https');
-const http       = require('http');
-const { URL }    = require('url');
 const { query }  = require('../helpers/db');
 const { verify, extractToken } = require('../helpers/jwt');
+const { sendEmail } = require('../helpers/email');
 
-// ─── Helper: enviar e-mail via relay externo (evita SMTP direto da Lambda/AWS) ─
+// ─── Helper: enviar e-mail via nodemailer (direto, sem relay HTTP) ─
 /**
- * Chama o relay HTTP no Render que dispara o e-mail via nodemailer + SMTP Kinghost.
- * Retorna true se o relay confirmou envio, false em caso de falha (nunca lança exceção).
+ * Envia e-mail usando nodemailer configurado via variáveis de ambiente.
+ * Retorna true se enviado com sucesso, false em caso de falha (nunca lança exceção).
  *
  * Variáveis necessárias no ambiente:
- *   EMAIL_RELAY_URL   — ex.: https://render7-email-relay.onrender.com/send-email
- *   EMAIL_RELAY_TOKEN — token Bearer que o relay exige
+ *   EMAIL_PROVIDER — 'gmail' | 'kinghost' | 'sendgrid' | 'custom' (padrão: 'custom')
+ *   EMAIL_USER     — usuário SMTP (obrigatório)
+ *   EMAIL_PASS     — senha SMTP (obrigatório)
+ *   EMAIL_HOST     — servidor SMTP (obrigatório para 'custom')
+ *   EMAIL_PORT     — porta SMTP (padrão: 587)
+ *   EMAIL_FROM     — endereço from (padrão: EMAIL_USER)
  */
-async function sendViaRelay(to, subject, html) {
-    const relayUrl   = process.env.EMAIL_RELAY_URL   || '';
-    const relayToken = process.env.EMAIL_RELAY_TOKEN || '';
-
-    if (!relayUrl) {
-        console.warn('[email] EMAIL_RELAY_URL não configurado — e-mail não enviado.');
-        return false;
-    }
-
-    console.log(`[email] Iniciando envio → to: ${to} | assunto: ${subject}`);
-    console.log(`[email] Relay URL: ${relayUrl}`);
-
-    const payload = JSON.stringify({ to, subject, html });
-
-    let parsed;
+async function sendEmailNotification(to, subject, html) {
     try {
-        parsed = new URL(relayUrl);
-    } catch (urlErr) {
-        console.error(`[email] EMAIL_RELAY_URL inválido: ${relayUrl} — ${urlErr.message}`);
+        await sendEmail({ to, subject, html });
+        return true;
+    } catch (err) {
+        console.error(`[email] Falha ao enviar: ${err.message}`);
         return false;
     }
-
-    const isHttps = parsed.protocol === 'https:';
-    const lib     = isHttps ? https : http;
-    const port    = parsed.port
-        ? parseInt(parsed.port, 10)
-        : (isHttps ? 443 : 80);
-
-    const options = {
-        hostname: parsed.hostname,
-        port,
-        path:     parsed.pathname + (parsed.search || ''),
-        method:   'POST',
-        headers: {
-            'Content-Type':   'application/json',
-            'Content-Length': Buffer.byteLength(payload),
-            'Authorization':  `Bearer ${relayToken}`,
-        },
-    };
-
-    return new Promise((resolve) => {
-        const req = lib.request(options, (res) => {
-            let data = '';
-            res.on('data', (chunk) => { data += chunk; });
-            res.on('end', () => {
-                if (res.statusCode >= 200 && res.statusCode < 300) {
-                    console.log(`[email] ✓ Relay respondeu ${res.statusCode} | ${data}`);
-                    resolve(true);
-                } else {
-                    console.error(`[email] ✗ Relay respondeu ${res.statusCode}: ${data}`);
-                    resolve(false);
-                }
-            });
-        });
-
-        req.on('error', (e) => {
-            console.error(`[email] ✗ Erro de conexão com relay: ${e.message} (code: ${e.code || 'n/a'})`);
-            resolve(false);
-        });
-
-        req.setTimeout(10000, () => {
-            console.error('[email] ✗ Timeout (10s) ao chamar relay — e-mail não enviado.');
-            req.destroy();
-            resolve(false);
-        });
-
-        req.write(payload);
-        req.end();
-    });
 }
 
 // ─── Template HTML de e-mail ───────────────────────────────────────────────────
@@ -114,6 +55,43 @@ function emailTemplateProjectCreated({ architectName, projectName, category, sta
     </table>
     <p style="color:#818781;font-size:12px;margin:0;line-height:1.6">
       Acesse o portal para visualizar os detalhes completos, materiais e documentação do projeto.
+    </p>
+  </div>
+  <div style="background:#F4F2EF;padding:16px 40px;text-align:center">
+    <p style="color:#818781;font-size:11px;margin:0">Render 7 © 2025 — Este é um e-mail automático, por favor não responda.</p>
+  </div>
+</div>`.trim();
+}
+
+// ─── Template: Notificação para CLIENTE (novo projeto disponível) ───────────
+function emailTemplateProjectCreatedForClient({ clientName, architectName, projectName, category, status, value, location }) {
+    return `
+<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#FAFAFA;border:1px solid #e0e0e0;border-radius:8px;overflow:hidden">
+  <div style="background:#1A1C1A;padding:32px 40px;text-align:center">
+    <h1 style="color:#C7BFB4;margin:0;font-size:20px;letter-spacing:3px;text-transform:uppercase">RENDER 7</h1>
+    <p style="color:#818781;margin:6px 0 0;font-size:11px;letter-spacing:1px;text-transform:uppercase">Portal de Projetos</p>
+  </div>
+  <div style="padding:40px">
+    <h2 style="color:#1A1C1A;font-size:18px;margin:0 0 6px;font-weight:700">Seu Projeto Está Pronto!</h2>
+    <p style="color:#383B38;font-size:14px;margin:0 0 28px;line-height:1.6">
+      Olá, <strong>${clientName}</strong>! Temos o prazer de informar que seu projeto foi registrado e está disponível no portal Render 7. Seu arquiteto <strong>${architectName}</strong> já foi notificado e iniciará o trabalho.
+    </p>
+    <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:28px">
+      <tr><td style="padding:10px 0;border-bottom:1px solid #EBEBEB;color:#818781;width:150px">Projeto</td>
+          <td style="padding:10px 0;border-bottom:1px solid #EBEBEB;color:#1A1C1A;font-weight:700">${projectName}</td></tr>
+      <tr><td style="padding:10px 0;border-bottom:1px solid #EBEBEB;color:#818781">Arquiteto</td>
+          <td style="padding:10px 0;border-bottom:1px solid #EBEBEB;color:#1A1C1A">${architectName}</td></tr>
+      <tr><td style="padding:10px 0;border-bottom:1px solid #EBEBEB;color:#818781">Categoria</td>
+          <td style="padding:10px 0;border-bottom:1px solid #EBEBEB;color:#1A1C1A">${category}</td></tr>
+      <tr><td style="padding:10px 0;border-bottom:1px solid #EBEBEB;color:#818781">Status</td>
+          <td style="padding:10px 0;border-bottom:1px solid #EBEBEB;color:#1A1C1A">${status}</td></tr>
+      <tr><td style="padding:10px 0;border-bottom:1px solid #EBEBEB;color:#818781">Valor da Obra</td>
+          <td style="padding:10px 0;border-bottom:1px solid #EBEBEB;color:#1A1C1A">R$ ${value}</td></tr>
+      <tr><td style="padding:10px 0;color:#818781">Localização</td>
+          <td style="padding:10px 0;color:#1A1C1A">${location || 'Não informado'}</td></tr>
+    </table>
+    <p style="color:#818781;font-size:12px;margin:0;line-height:1.6">
+      Você pode acompanhar o progresso do projeto acessando seu portal com as credenciais fornecidas.
     </p>
   </div>
   <div style="background:#F4F2EF;padding:16px 40px;text-align:center">
@@ -221,7 +199,9 @@ module.exports.list = async (event) => {
                        CASE WHEN p.image_base64 IS NOT NULL THEN 1 ELSE 0 END AS has_image,
                        CASE WHEN p.pdf_base64   IS NOT NULL THEN 1 ELSE 0 END AS has_pdf,
                        a.name AS architect_name,
-                       c.name AS client_name
+                       a.email AS architect_email,
+                       c.name AS client_name,
+                       c.email AS client_email
                 FROM projects p
                 LEFT JOIN architects a ON a.id = p.architect_id
                 LEFT JOIN clients    c ON c.id = p.client_id
@@ -234,8 +214,12 @@ module.exports.list = async (event) => {
                        p.pdf_name, p.created_at,
                        CASE WHEN p.image_base64 IS NOT NULL THEN 1 ELSE 0 END AS has_image,
                        CASE WHEN p.pdf_base64   IS NOT NULL THEN 1 ELSE 0 END AS has_pdf,
-                       c.name AS client_name
+                       a.name AS architect_name,
+                       a.email AS architect_email,
+                       c.name AS client_name,
+                       c.email AS client_email
                 FROM projects p
+                LEFT JOIN architects a ON a.id = p.architect_id
                 LEFT JOIN clients c ON c.id = p.client_id
                 WHERE p.architect_id = ?
                 ORDER BY p.created_at DESC`;
@@ -247,8 +231,14 @@ module.exports.list = async (event) => {
                        p.value, p.status, p.architect_id, p.client_id,
                        p.pdf_name, p.created_at,
                        CASE WHEN p.image_base64 IS NOT NULL THEN 1 ELSE 0 END AS has_image,
-                       CASE WHEN p.pdf_base64   IS NOT NULL THEN 1 ELSE 0 END AS has_pdf
+                       CASE WHEN p.pdf_base64   IS NOT NULL THEN 1 ELSE 0 END AS has_pdf,
+                       a.name AS architect_name,
+                       a.email AS architect_email,
+                       c.name AS client_name,
+                       c.email AS client_email
                 FROM projects p
+                LEFT JOIN architects a ON a.id = p.architect_id
+                LEFT JOIN clients    c ON c.id = p.client_id
                 WHERE p.client_id = ?
                 ORDER BY p.created_at DESC`;
             params = [payload.id];
@@ -281,7 +271,8 @@ module.exports.getOne = async (event) => {
 
     try {
         const { rows } = await query(
-            `SELECT p.*, a.name AS architect_name, c.name AS client_name
+            `SELECT p.*, a.name AS architect_name, a.email AS architect_email,
+                    c.name AS client_name, c.email AS client_email
              FROM projects p
              LEFT JOIN architects a ON a.id = p.architect_id
              LEFT JOIN clients    c ON c.id = p.client_id
@@ -380,7 +371,8 @@ module.exports.create = async (event) => {
                     CASE WHEN p.pdf_base64   IS NOT NULL THEN 1 ELSE 0 END AS has_pdf,
                     a.name  AS architect_name,
                     a.email AS architect_email,
-                    c.name  AS client_name
+                    c.name  AS client_name,
+                    c.email AS client_email
              FROM projects p
              LEFT JOIN architects a ON a.id = p.architect_id
              LEFT JOIN clients    c ON c.id = p.client_id
@@ -391,10 +383,10 @@ module.exports.create = async (event) => {
         const project = rows[0];
         console.log(`[projects.create] Projeto #${project.id} "${project.name}" criado com sucesso.`);
 
-        // ── Notificar arquiteto por e-mail ────────────────────────────────────
-        let emailSent = false;
+        // ── Notificar ARQUITETO por e-mail ─────────────────────────────────────
+        let architectEmailSent = false;
         if (project.architect_email) {
-            console.log(`[projects.create] Enviando e-mail de notificação para o arquiteto: ${project.architect_email}`);
+            console.log(`[projects.create] Enviando notificação ao arquiteto: ${project.architect_email}`);
             const html = emailTemplateProjectCreated({
                 architectName: project.architect_name || 'Arquiteto',
                 projectName:   project.name,
@@ -404,19 +396,46 @@ module.exports.create = async (event) => {
                 location:      project.location,
                 clientName:    project.client_name || 'Cliente',
             });
-            emailSent = await sendViaRelay(
+            architectEmailSent = await sendEmailNotification(
                 project.architect_email,
                 `Novo projeto atribuído — ${project.name}`,
                 html
             );
-            console.log(`[projects.create] E-mail enviado: ${emailSent}`);
+            console.log(`[projects.create] E-mail arquiteto: ${architectEmailSent ? '✓' : '✗'}`);
         } else {
-            console.warn('[projects.create] Arquiteto sem e-mail cadastrado — notificação não enviada.');
+            console.warn('[projects.create] Arquiteto sem e-mail — notificação não enviada.');
+        }
+
+        // ── Notificar CLIENTE por e-mail ────────────────────────────────────────
+        let clientEmailSent = false;
+        if (project.client_email) {
+            console.log(`[projects.create] Enviando notificação ao cliente: ${project.client_email}`);
+            const htmlClient = emailTemplateProjectCreatedForClient({
+                clientName:    project.client_name || 'Cliente',
+                architectName: project.architect_name || 'Arquiteto',
+                projectName:   project.name,
+                category:      project.category,
+                status:        project.status,
+                value:         project.value,
+                location:      project.location,
+            });
+            clientEmailSent = await sendEmailNotification(
+                project.client_email,
+                `Seu projeto ${project.name} está pronto!`,
+                htmlClient
+            );
+            console.log(`[projects.create] E-mail cliente: ${clientEmailSent ? '✓' : '✗'}`);
+        } else {
+            console.warn('[projects.create] Cliente sem e-mail — notificação não enviada.');
         }
 
         // Não expor e-mail do arquiteto na resposta
         const { architect_email, ...projectPublic } = project;
-        return resp(201, { ...projectPublic, email_sent: emailSent });
+        return resp(201, {
+            ...projectPublic,
+            email_architect_sent: architectEmailSent,
+            email_client_sent:    clientEmailSent,
+        });
     } catch (e) {
         console.error('projects.create:', e);
         return resp(500, { error: 'Erro interno.' });
@@ -511,7 +530,7 @@ module.exports.update = async (event) => {
 
         const { rows } = await query(
             `SELECT p.*, a.name AS architect_name, a.email AS architect_email,
-                    c.name AS client_name
+                    c.name AS client_name, c.email AS client_email
              FROM projects p
              LEFT JOIN architects a ON a.id = p.architect_id
              LEFT JOIN clients    c ON c.id = p.client_id
@@ -521,8 +540,8 @@ module.exports.update = async (event) => {
 
         const project = rows[0];
 
-        // ── Notificar arquiteto por e-mail ────────────────────────────────────
-        let emailSent = false;
+        // ── Notificar ARQUITETO por e-mail ────────────────────────────────────
+        let architectEmailSent = false;
         if (project.architect_email) {
             console.log(`[projects.update] Enviando e-mail de notificação para o arquiteto: ${project.architect_email}`);
             const html = emailTemplateProjectUpdated({
@@ -534,19 +553,46 @@ module.exports.update = async (event) => {
                 location:      project.location,
                 clientName:    project.client_name || 'Cliente',
             });
-            emailSent = await sendViaRelay(
+            architectEmailSent = await sendEmailNotification(
                 project.architect_email,
                 `Projeto atualizado — ${project.name}`,
                 html
             );
-            console.log(`[projects.update] E-mail enviado: ${emailSent}`);
+            console.log(`[projects.update] E-mail arquiteto: ${architectEmailSent ? '✓' : '✗'}`);
         } else {
-            console.warn('[projects.update] Arquiteto sem e-mail cadastrado — notificação não enviada.');
+            console.warn('[projects.update] Arquiteto sem e-mail — notificação não enviada.');
         }
 
-        // Não expor e-mail do arquiteto na resposta
-        const { architect_email, ...projectPublic } = project;
-        return resp(200, { ...projectPublic, email_sent: emailSent });
+        // ── Notificar CLIENTE por e-mail ────────────────────────────────────
+        let clientEmailSent = false;
+        if (project.client_email) {
+            console.log(`[projects.update] Enviando e-mail de notificação para o cliente: ${project.client_email}`);
+            const htmlClient = emailTemplateProjectCreatedForClient({
+                clientName:    project.client_name || 'Cliente',
+                architectName: project.architect_name || 'Arquiteto',
+                projectName:   project.name,
+                category:      project.category,
+                status:        project.status,
+                value:         project.value,
+                location:      project.location,
+            });
+            clientEmailSent = await sendEmailNotification(
+                project.client_email,
+                `Projeto atualizado — ${project.name}`,
+                htmlClient
+            );
+            console.log(`[projects.update] E-mail cliente: ${clientEmailSent ? '✓' : '✗'}`);
+        } else {
+            console.warn('[projects.update] Cliente sem e-mail — notificação não enviada.');
+        }
+
+        // Não expor e-mails na resposta
+        const { architect_email, client_email, ...projectPublic } = project;
+        return resp(200, {
+            ...projectPublic,
+            email_architect_sent: architectEmailSent,
+            email_client_sent:    clientEmailSent,
+        });
     } catch (e) {
         console.error('projects.update:', e);
         return resp(500, { error: 'Erro interno.' });
