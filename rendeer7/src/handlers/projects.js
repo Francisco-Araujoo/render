@@ -16,9 +16,9 @@ const { sendEmail } = require('../helpers/email');
  *   EMAIL_PORT     — porta SMTP (padrão: 587)
  *   EMAIL_FROM     — endereço from (padrão: EMAIL_USER)
  */
-async function sendEmailNotification(to, subject, html) {
+async function sendEmailNotification(to, subject, html, text) {
     try {
-        await sendEmail({ to, subject, html });
+        await sendEmail({ to, subject, html, text });
         return true;
     } catch (err) {
         console.error(`[email] Falha ao enviar: ${err.message}`);
@@ -396,10 +396,12 @@ module.exports.create = async (event) => {
                 location:      project.location,
                 clientName:    project.client_name || 'Cliente',
             });
+            const textArch = `Novo projeto atribuído — ${project.name}\n\nOlá, ${project.architect_name || 'Arquiteto'}.\nUm novo projeto foi criado e atribuído a você.\n\nProjeto: ${project.name}\nCliente: ${project.client_name || 'Cliente'}\nCategoria: ${project.category}\nStatus: ${project.status}\nValor: R$ ${project.value}\nLocalização: ${project.location || 'Não informado'}\n\nRender 7 — Portal de Projetos`;
             architectEmailSent = await sendEmailNotification(
                 project.architect_email,
                 `Novo projeto atribuído — ${project.name}`,
-                html
+                html,
+                textArch
             );
             console.log(`[projects.create] E-mail arquiteto: ${architectEmailSent ? '✓' : '✗'}`);
         } else {
@@ -419,10 +421,12 @@ module.exports.create = async (event) => {
                 value:         project.value,
                 location:      project.location,
             });
+            const textClient = `Seu projeto ${project.name} está pronto!\n\nOlá, ${project.client_name || 'Cliente'}.\nSeu projeto foi registrado no portal Render 7.\n\nProjeto: ${project.name}\nArquiteto: ${project.architect_name || 'Arquiteto'}\nCategoria: ${project.category}\nStatus: ${project.status}\nValor: R$ ${project.value}\nLocalização: ${project.location || 'Não informado'}\n\nRender 7 — Portal de Projetos`;
             clientEmailSent = await sendEmailNotification(
                 project.client_email,
                 `Seu projeto ${project.name} está pronto!`,
-                htmlClient
+                htmlClient,
+                textClient
             );
             console.log(`[projects.create] E-mail cliente: ${clientEmailSent ? '✓' : '✗'}`);
         } else {
@@ -553,10 +557,12 @@ module.exports.update = async (event) => {
                 location:      project.location,
                 clientName:    project.client_name || 'Cliente',
             });
+            const textArchUpd = `Projeto atualizado — ${project.name}\n\nOlá, ${project.architect_name || 'Arquiteto'}.\nO projeto abaixo foi atualizado.\n\nProjeto: ${project.name}\nCliente: ${project.client_name || 'Cliente'}\nCategoria: ${project.category}\nStatus: ${project.status}\nValor: R$ ${project.value}\nLocalização: ${project.location || 'Não informado'}\n\nRender 7 — Portal de Projetos`;
             architectEmailSent = await sendEmailNotification(
                 project.architect_email,
                 `Projeto atualizado — ${project.name}`,
-                html
+                html,
+                textArchUpd
             );
             console.log(`[projects.update] E-mail arquiteto: ${architectEmailSent ? '✓' : '✗'}`);
         } else {
@@ -576,10 +582,12 @@ module.exports.update = async (event) => {
                 value:         project.value,
                 location:      project.location,
             });
+            const textClientUpd = `Projeto atualizado — ${project.name}\n\nOlá, ${project.client_name || 'Cliente'}.\nSeu projeto foi atualizado no portal Render 7.\n\nProjeto: ${project.name}\nArquiteto: ${project.architect_name || 'Arquiteto'}\nCategoria: ${project.category}\nStatus: ${project.status}\nValor: R$ ${project.value}\nLocalização: ${project.location || 'Não informado'}\n\nRender 7 — Portal de Projetos`;
             clientEmailSent = await sendEmailNotification(
                 project.client_email,
                 `Projeto atualizado — ${project.name}`,
-                htmlClient
+                htmlClient,
+                textClientUpd
             );
             console.log(`[projects.update] E-mail cliente: ${clientEmailSent ? '✓' : '✗'}`);
         } else {

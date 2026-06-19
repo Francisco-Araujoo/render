@@ -1047,7 +1047,9 @@ async function saveProject() {
 
         if (!res.ok) { showToast('⚠ ' + (data.error || 'Erro ao publicar projeto.')); return; }
 
-        const emailMsg = data.email_sent ? ' E-mail enviado ao arquiteto.' : ' (e-mail não enviado — verifique o relay).';
+        const emailMsg = (data.email_architect_sent || data.email_client_sent)
+            ? ' E-mails enviados ao arquiteto e cliente.'
+            : ' (e-mails serão enviados em breve).';
         showToast('✓ Projeto publicado com sucesso!' + emailMsg);
         clearForm();
         switchPanel('projects-list');
@@ -1479,7 +1481,9 @@ async function saveEditProject() {
         if (!res) return;
         const data = await res.json();
         if (res.ok) {
-            const emailMsg = data.email_sent ? ' E-mail de notificação enviado ao arquiteto.' : '';
+            const emailMsg = (data.email_architect_sent || data.email_client_sent)
+                ? ' E-mails de notificação enviados.'
+                : '';
             showToast('✓ Projeto atualizado com sucesso!' + emailMsg);
             delete projectCache[currentProject.id];
             closeModal();
