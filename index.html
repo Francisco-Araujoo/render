@@ -177,8 +177,48 @@
     <section id="arquiteto" class="py-24 md:py-40 px-6 md:px-16 bg-brand-white text-brand-darkGreen">
         <div class="max-w-screen-2xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-24 items-center">
             
-            <div class="order-2 lg:order-1 h-[40vh] sm:h-[50vh] md:h-[80vh] w-full overflow-hidden fade-up bg-brand-lightGreen">
-                <img src="APRESENTAÇÃO DE MARCA - RENDER7 (4)_compressed_page-0055.jpg" alt="Arquiteto Carlos Filipov" class="img-cover grayscale hover:grayscale-0 transition duration-700">
+            <!-- Módulo de vídeo com moldura arquitetônica -->
+            <div class="order-2 lg:order-1 fade-up flex flex-col items-center">
+
+                <!-- Header do módulo -->
+                <div class="w-full max-w-[440px] flex items-center justify-between mb-3 px-1">
+                    <span class="font-sans font-bold text-[9px] uppercase tracking-[0.3em] text-brand-brown flex items-center gap-3">
+                        <span class="w-5 h-[1px] bg-brand-brown inline-block"></span> A Marca
+                    </span>
+                    <span class="font-display font-black text-brand-mainBeige/30 text-base leading-none">01</span>
+                </div>
+
+                <!-- Moldura principal com cantos arquitetônicos -->
+                <div class="relative max-w-[440px] w-full p-[6px] border border-brand-mainBeige/25" style="box-shadow: 5px 5px 0 0 rgba(199,191,180,0.35);">
+                    <!-- Cantos decorativos -->
+                    <span class="absolute -top-px -left-px w-5 h-5 border-t-2 border-l-2 border-brand-mainBeige z-10 pointer-events-none"></span>
+                    <span class="absolute -top-px -right-px w-5 h-5 border-t-2 border-r-2 border-brand-mainBeige z-10 pointer-events-none"></span>
+                    <span class="absolute -bottom-px -left-px w-5 h-5 border-b-2 border-l-2 border-brand-mainBeige z-10 pointer-events-none"></span>
+                    <span class="absolute -bottom-px -right-px w-5 h-5 border-b-2 border-r-2 border-brand-mainBeige z-10 pointer-events-none"></span>
+
+                    <!-- Vídeo -->
+                    <div class="relative bg-brand-black cursor-pointer group" id="video-container">
+                        <video id="project-video" class="w-full h-auto opacity-80 block" loop playsinline preload="metadata">
+                            <source src="/video/IMG_0062.mp4" type="video/mp4">
+                        </video>
+                        <!-- Overlay -->
+                        <div id="video-overlay" class="absolute inset-0 bg-brand-black/40 transition-opacity duration-300 flex items-center justify-center">
+                            <button id="play-btn" class="relative flex items-center justify-center w-16 h-16 md:w-20 md:h-20 rounded-full border border-brand-mainBeige/70 backdrop-blur-sm bg-brand-black/30 hover:bg-brand-mainBeige/20 hover:border-brand-mainBeige hover:scale-110 transition-all duration-300">
+                                <svg class="w-6 h-6 md:w-8 md:h-8 fill-brand-mainBeige ml-1" viewBox="0 0 24 24">
+                                    <path d="M8 5v14l11-7z"/>
+                                </svg>
+                                <span class="absolute -bottom-7 left-1/2 -translate-x-1/2 font-sans font-bold text-[8px] uppercase tracking-[0.3em] text-brand-mainBeige/60 whitespace-nowrap">Reproduzir</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer do módulo -->
+                <div class="w-full max-w-[440px] flex items-center justify-between mt-3 px-1">
+                    <span class="font-sans text-[8px] uppercase tracking-[0.3em] text-brand-mainGrey/60">Carlos Filipov — Arquiteto</span>
+                    <span class="font-sans text-[8px] uppercase tracking-[0.3em] text-brand-mainGrey/40">Render 7</span>
+                </div>
+
             </div>
 
             <div class="order-1 lg:order-2 fade-up">
@@ -239,7 +279,7 @@
                     <img src="APRESENTAÇÃO DE MARCA - RENDER7 (4)_compressed_page-0059.jpg" alt="Supervisão" class="img-cover grayscale hover:grayscale-0 transition duration-700">
                 </div>
                 <div class="h-[40vh] md:h-[70vh] w-full mt-0 md:mt-24 bg-brand-mainGrey/20">
-                    <img src="APRESENTAÇÃO DE MARCA - RENDER7 (4)_compressed_page-0058.jpg" alt="Estrutura" class="img-cover grayscale hover:grayscale-0 transition duration-700">
+                    <img src="APRESENTAÇÃO DE MARCA - RENDER7 (4)_compressed_page-0054.jpg" alt="Estrutura" class="img-cover grayscale hover:grayscale-0 transition duration-700">
                 </div>
             </div>
         </div>
@@ -535,6 +575,30 @@
                     projectModal.scrollTo(0, 0); 
                 }
             });
+        });
+        // 6. Video Player
+        const videoContainer = document.getElementById('video-container');
+        const video = document.getElementById('project-video');
+        const playBtn = document.getElementById('play-btn');
+        const videoOverlay = document.getElementById('video-overlay');
+
+        function toggleVideo() {
+            if (video.paused) {
+                video.play();
+                videoOverlay.style.opacity = '0';
+                videoOverlay.style.pointerEvents = 'none';
+            } else {
+                video.pause();
+                videoOverlay.style.opacity = '1';
+                videoOverlay.style.pointerEvents = 'auto';
+            }
+        }
+
+        playBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleVideo(); });
+        videoContainer.addEventListener('click', toggleVideo);
+        video.addEventListener('ended', () => {
+            videoOverlay.style.opacity = '1';
+            videoOverlay.style.pointerEvents = 'auto';
         });
     </script>
 </body>
