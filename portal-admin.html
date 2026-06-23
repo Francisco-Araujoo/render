@@ -609,12 +609,21 @@
 
         <!-- ===== PANEL: PROJECTS LIST ===== -->
         <section id="panel-projects-list" class="panel">
-            <div class="mb-8 flex items-start justify-between gap-4">
+            <div class="mb-6 flex items-start justify-between gap-4">
                 <div>
                     <h1 class="font-display font-black text-2xl md:text-3xl uppercase tracking-tight text-brand-darkGreen mb-1">Projetos Enviados</h1>
                     <p class="font-sans text-brand-mainGrey text-sm">Todos os documentos disponibilizados.</p>
                 </div>
                 <button class="btn-primary flex-shrink-0" onclick="switchPanel('add-project')">+ Adicionar</button>
+            </div>
+            <!-- Barra de pesquisa -->
+            <div class="mb-6">
+                <div class="relative max-w-xs">
+                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-mainGrey pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    <input type="text" id="projects-search" class="form-input pl-9" placeholder="Buscar por nome do arquiteto..." oninput="filterProjects()">
+                </div>
             </div>
             <div id="projects-list-container" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
                 <div class="stat-card col-span-full py-16 text-center">
@@ -1133,23 +1142,47 @@ async function renderDashboard() {
 }
 
 // ─── Projects List ────────────────────────────────────────────────────────────
+let allProjects = [];
+
 async function renderProjectsList() {
     const container = document.getElementById('projects-list-container');
     container.innerHTML = '<p class="font-sans text-sm text-brand-mainGrey col-span-full text-center py-8">Carregando...</p>';
+    const searchEl = document.getElementById('projects-search');
+    if (searchEl) searchEl.value = '';
     try {
         const res = await api('GET', '/projects');
         if (!res) return;
-        const projects = await res.json();
+        allProjects = await res.json();
+        renderProjectsCards(allProjects);
+    } catch (e) {
+        console.error('renderProjectsList:', e);
+        container.innerHTML = '<p class="font-sans text-sm text-brand-mainGrey col-span-full text-center py-8">Erro ao carregar projetos.</p>';
+    }
+}
 
-        if (!projects.length) {
-            container.innerHTML = `
-                <div class="stat-card col-span-full py-16 text-center">
-                    <p class="font-sans text-brand-mainGrey text-sm">Nenhum projeto adicionado ainda.</p>
-                    <button class="btn-primary mt-4" onclick="switchPanel('add-project')">Adicionar Primeiro Projeto</button>
-                </div>`;
-            return;
-        }
-        container.innerHTML = projects.map(p => `
+function filterProjects() {
+    const query = (document.getElementById('projects-search').value || '').trim().toLowerCase();
+    const filtered = query
+        ? allProjects.filter(p => (p.architect_name || '').toLowerCase().includes(query))
+        : allProjects;
+    renderProjectsCards(filtered);
+}
+
+function renderProjectsCards(projects) {
+    const container = document.getElementById('projects-list-container');
+    if (!projects.length) {
+        const hasData = allProjects.length > 0;
+        container.innerHTML = hasData
+            ? `<div class="stat-card col-span-full py-8 text-center">
+                   <p class="font-sans text-brand-mainGrey text-sm">Nenhum projeto encontrado para este arquiteto.</p>
+               </div>`
+            : `<div class="stat-card col-span-full py-16 text-center">
+                   <p class="font-sans text-brand-mainGrey text-sm">Nenhum projeto adicionado ainda.</p>
+                   <button class="btn-primary mt-4" onclick="switchPanel('add-project')">Adicionar Primeiro Projeto</button>
+               </div>`;
+        return;
+    }
+    container.innerHTML = projects.map(p => `
             <div class="project-card overflow-hidden">
                 <div class="aspect-video bg-brand-lightGreen overflow-hidden flex items-center justify-center cursor-pointer" onclick="viewProject(${p.id})">
                     ${p.has_image
@@ -1172,7 +1205,7 @@ async function renderProjectsList() {
                     </p>
                     <div class="flex items-center justify-between pt-3 border-t border-brand-lightGreen">
                         <div>
-                            <p class="font-sans font-bold text-[9px] uppercase tracking-widest text-brand-mainGrey">Valor</p>
+                            <p class="font-sans font-bold text-[9px] uppercase tracking-widests text-brand-mainGrey">Valor</p>
                             <p class="font-display font-black text-sm text-brand-darkGreen">R$ ${p.value}</p>
                         </div>
                         <div class="flex gap-2 items-center">
@@ -1185,23 +1218,19 @@ async function renderProjectsList() {
                 </div>
             </div>
         `).join('');
-        // Lazy-load thumbnail images
-        projects.filter(p => p.has_image).forEach(p => {
-            (async () => {
-                try {
-                    const data = await fetchProjectCached(p.id);
-                    if (!data?.image_base64) return;
-                    const img  = document.getElementById('card-img-' + p.id);
-                    const spin = document.getElementById('card-spin-' + p.id);
-                    if (img)  { img.src = data.image_base64; img.classList.remove('hidden'); }
-                    if (spin) { spin.style.display = 'none'; }
-                } catch {}
-            })();
-        });
-    } catch (e) {
-        console.error('renderProjectsList:', e);
-        container.innerHTML = '<p class="font-sans text-sm text-brand-mainGrey col-span-full text-center py-8">Erro ao carregar projetos.</p>';
-    }
+    // Lazy-load thumbnail images
+    projects.filter(p => p.has_image).forEach(p => {
+        (async () => {
+            try {
+                const data = await fetchProjectCached(p.id);
+                if (!data?.image_base64) return;
+                const img  = document.getElementById('card-img-' + p.id);
+                const spin = document.getElementById('card-spin-' + p.id);
+                if (img)  { img.src = data.image_base64; img.classList.remove('hidden'); }
+                if (spin) { spin.style.display = 'none'; }
+            } catch {}
+        })();
+    });
 }
 
 async function deleteProject(id) {
